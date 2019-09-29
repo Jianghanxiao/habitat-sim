@@ -33,32 +33,47 @@ class Arguments;
 namespace esp {
 namespace gfx {
 
+typedef struct link
+{
+    std::string link_name = "";
+    std::string mesh_name = "";
+    struct link *parent_link = NULL;
+    std::vector<struct link *> child_link;
+} Link;
+
+typedef struct joint
+{
+    std::string parent_name = "";
+    std::string child_name = "";
+} Joint;
+
 class Viewer : public Magnum::Platform::Application {
  public:
   explicit Viewer(const Arguments& arguments);
 
  private:
   void drawEvent() override;
-  void viewportEvent(ViewportEvent& event) override;
-  void mousePressEvent(MouseEvent& event) override;
-  void mouseReleaseEvent(MouseEvent& event) override;
-  void mouseMoveEvent(MouseMoveEvent& event) override;
-  void mouseScrollEvent(MouseScrollEvent& event) override;
-  void keyPressEvent(KeyEvent& event) override;
+  // void viewportEvent(ViewportEvent& event) override;
+  // void mousePressEvent(MouseEvent& event) override;
+  // void mouseReleaseEvent(MouseEvent& event) override;
+  // void mouseMoveEvent(MouseMoveEvent& event) override;
+  // void mouseScrollEvent(MouseScrollEvent& event) override;
+  // void keyPressEvent(KeyEvent& event) override;
 
   // Interactive functions
-  void addObject(std::string configFile);
-  void pokeLastObject();
-  void pushLastObject();
+  void loadURDFMesh(Link *node, scene::SceneNode* parent, Magnum::SceneGraph::DrawableGroup3D* drawables);
+  // void addObject(std::string configFile);
+  // void pokeLastObject();
+  // void pushLastObject();
 
-  void torqueLastObject();
-  void removeLastObject();
-  void invertGravity();
-  Magnum::Vector3 randomDirection();
-  void wiggleLastObject();
+  // void torqueLastObject();
+  // void removeLastObject();
+  // void invertGravity();
+  // Magnum::Vector3 randomDirection();
+  // void wiggleLastObject();
 
-  Magnum::Vector3 positionOnSphere(Magnum::SceneGraph::Camera3D& camera,
-                                   const Magnum::Vector2i& position);
+  // Magnum::Vector3 positionOnSphere(Magnum::SceneGraph::Camera3D& camera,
+  //                                  const Magnum::Vector2i& position);
 
   assets::ResourceManager resourceManager_;
   // SceneManager must be before physicsManager_ as the physicsManager_
@@ -84,6 +99,8 @@ class Viewer : public Magnum::Platform::Application {
   std::vector<int> objectIDs_;
 
   Magnum::Timeline timeline_;
+
+  std::vector<Link *> link_vec;
 };
 
 }  // namespace gfx
