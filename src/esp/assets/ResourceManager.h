@@ -49,6 +49,20 @@ class RigidObject;
 }  // namespace physics
 namespace assets {
 
+typedef struct link
+{
+    std::string link_name = "";
+    std::string mesh_name = "";
+    struct link *parent_link = NULL;
+    std::vector<struct link *> child_link;
+} Link;
+
+typedef struct joint
+{
+    std::string parent_name = "";
+    std::string child_name = "";
+} Joint;
+
 /**
 @brief Loaded asset and resource manager.
 */
@@ -164,6 +178,13 @@ class ResourceManager {
   bool loadInstanceMeshData(const AssetInfo& info,
                             scene::SceneNode* parent,
                             DrawableGroup* drawables);
+
+  // load the URDF
+  bool loadURDF(const AssetInfo& info,
+                scene::SceneNode* parent,
+                DrawableGroup* drawables);
+
+  void loadURDFMesh(Link *node, scene::SceneNode* parent, Magnum::SceneGraph::DrawableGroup3D* drawables);
 
   // load the mesh data
   // If parent, also do scene graph

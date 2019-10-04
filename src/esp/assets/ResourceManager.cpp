@@ -73,7 +73,10 @@ bool ResourceManager::loadScene(const AssetInfo& info,
         meshSuccess = loadSUNCGHouseFile(info, parent, drawables);
       } else if (info.type == AssetType::MP3D_MESH) {
         meshSuccess = loadGeneralMeshData(info, parent, drawables);
-      } else {
+      } else if (info.type == AssetType::URDF) {
+        meshSuccess = loadURDF(info, parent, drawables);
+      } 
+      else {
         // Unknown type, just load general mesh data
         meshSuccess = loadGeneralMeshData(info, parent, drawables);
       }
@@ -777,6 +780,152 @@ bool ResourceManager::loadInstanceMeshData(const AssetInfo& info,
   }
 
   return true;
+}
+
+// import one URDF and constrcut the tree structure
+bool ResourceManager::loadURDF(const AssetInfo& info,
+                                           scene::SceneNode* parent,
+                                           DrawableGroup* drawables) {
+  // load the URDF
+  const std::string& filename = info.filepath;
+  if (freopen(filename.c_str(), "r", stdin) == NULL)
+  {
+      LOG(ERROR) << "Cannot open URDF file\n";
+      std::exit(1);
+  }
+
+  // Parse the URDF
+  std::string line;
+  int index = -1;
+  int name_index1 = -1;
+  int name_index2 = -1;
+  bool is_link = false, is_joint = false;
+  std::vector<Joint *> joint_vec;
+  std::map<std::string, Link *> name_link_map;
+
+  while (std::getline(std::cin, line))
+  {
+    if (line != "")
+    {
+      //std::cout << line << "\n";
+      // Judge whether this line is used to define the link
+      index = line.find("<link");
+      if (index != -1)
+      {
+        is_link = true;
+        name_index1 = line.find("\"");
+        name_index2 = line.find("\"", name_index1 + 1);
+        link_vec.push_back(new Link);
+        link_vec[link_vec.size() - 1]->link_name = line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
+        name_link_map[link_vec[link_vec.size() - 1]->link_name] = link_vec[link_vec.size() - 1];
+      }
+      // Get the mesh filename
+      index = line.find("<mesh");
+      if (index != -1 && is_link == true)
+      {
+        name_index1 = line.find("\"");
+        name_index2 = line.find("\"", name_index1 + 1);
+        link_vec[link_vec.size() - 1]->mesh_name = "/Users/apple/Desktop/Habitat-sim_Project/habitat-sim/" + line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
+        //std::cout << name_link_map[link_vec[link_vec.size() - 1]->link_name] << "; " << link_vec[link_vec.size() - 1] << "\n";
+      }
+
+      index = line.find("</link");
+      if (index != -1)
+      {
+        is_link = false;
+      }
+
+      // Judge whether this line is to define a joint
+      index = line.find("<joint");
+      if (index != -1)
+      {
+        is_joint = true;
+        joint_vec.push_back(new Joint);
+      }
+      // Get the parent name
+      index = line.find("<parent");
+      if (index != -1 && is_joint == true)
+      {
+        name_index1 = line.find("\"");
+        name_index2 = line.find("\"", name_index1 + 1);
+        joint_vec[joint_vec.size() - 1]->parent_name = line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
+      }
+      // Get the child name
+      index = line.find("<child");
+      if (index != -1 && is_joint == true)
+      {
+        name_index1 = line.find("\"");
+        name_index2 = line.find("\"", name_index1 + 1);
+        joint_vec[joint_vec.size() - 1]->child_name = line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
+      }
+
+      index = line.find("</joint");
+      if (index != -1)
+      {
+        is_joint = false;
+      }
+    }
+  }
+
+  // Construct the tree from link and joint
+  // The root node should be "0:virtual"
+  for (int i = 0; i <= joint_vec.size() - 1; ++i)
+  {
+      std::string parent_name = joint_vec[i]->parent_name;
+      std::string children_name = joint_vec[i]->child_name;
+      Link *parent = name_link_map[parent_name];
+      Link *children = name_link_map[children_name];
+
+      children->parent_link = parent;
+      parent->child_link.push_back(children);
+      //std::cout <<parent_name << "; " << children_name << "\n";
+  }
+
+  fclose(stdin);
+  
+  // Get the root node of the URDF tree
+  Link *root = NULL;
+  for (int i = 0; i <= link_vec.size() - 1; ++i)
+  {
+    if (link_vec[i]->parent_link == NULL)
+    {
+      root = link_vec[i];
+      break;
+    }
+  }
+
+  if(root == NULL)
+  {
+    LOG(ERROR) << "Error format in URDF\n";
+    std::exit(1);
+  }
+
+  loadURDFMesh(root, navSceneNode_, &drawables);
+
+  return true;
+}
+
+void ResourceManager::loadURDFMesh(Link *node, scene::SceneNode* parent, Magnum::SceneGraph::DrawableGroup3D* drawables)
+{
+  // std::cout << "!!!!\n";
+  // std::cout << node->link_name << "\n";
+  // std::cout << node->mesh_name << "\n";
+  const std::string& file = node->mesh_name;
+
+  if(file != "") {
+    const assets::AssetInfo info = assets::AssetInfo::fromPath(file);
+
+    if (!resourceManager_.loadScene(info, parent, drawables)) {
+       LOG(ERROR) << "cannot load " << file;
+       std::exit(1);
+    }
+  }
+
+  std::cout << node->child_link.size() << "\n";
+  for(int i=0; i<=int(node->child_link.size())-1; ++i) {
+    loadURDFMesh(node->child_link[i] ,&parent->createChild(), drawables);
+  }
+  
 }
 
 bool ResourceManager::loadGeneralMeshData(
