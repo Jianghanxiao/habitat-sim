@@ -22,6 +22,7 @@ enum class AssetType {
   FRL_PTEX_MESH,
   UNKNOWN2,
   NAVMESH,
+  URDF,
 };
 
 // loading and asset info with filepath == EMPTY_SCENE creates a scene graph
