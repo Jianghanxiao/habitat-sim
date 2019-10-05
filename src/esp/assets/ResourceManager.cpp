@@ -922,7 +922,7 @@ void ResourceManager::loadURDFMesh(Link *node, scene::SceneNode* parent, Magnum:
     }
   }
 
-  std::cout << node->child_link.size() << "\n";
+  //std::cout << node->child_link.size() << "\n";
   for(int i=0; i<=int(node->child_link.size())-1; ++i) {
     loadURDFMesh(node->child_link[i] ,&parent->createChild(), drawables);
   }
