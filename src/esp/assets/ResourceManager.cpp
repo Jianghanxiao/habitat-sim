@@ -22,6 +22,7 @@
 #include <Magnum/Trade/PhongMaterialData.h>
 #include <Magnum/Trade/SceneData.h>
 #include <Magnum/Trade/TextureData.h>
+#include <iostream>
 
 #include "esp/geo/geo.h"
 #include "esp/gfx/GenericDrawable.h"
@@ -900,7 +901,7 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
     std::exit(1);
   }
 
-  loadURDFMesh(root, navSceneNode_, &drawables);
+  loadURDFMesh(root, parent, drawables);
 
   return true;
 }
@@ -915,7 +916,7 @@ void ResourceManager::loadURDFMesh(Link *node, scene::SceneNode* parent, Magnum:
   if(file != "") {
     const assets::AssetInfo info = assets::AssetInfo::fromPath(file);
 
-    if (!resourceManager_.loadScene(info, parent, drawables)) {
+    if (!loadScene(info, parent, drawables)) {
        LOG(ERROR) << "cannot load " << file;
        std::exit(1);
     }

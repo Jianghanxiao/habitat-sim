@@ -292,6 +292,8 @@ class ResourceManager {
       const Magnum::Color4& color = Magnum::Color4{1});
 
   bool compressTextures_ = false;
+
+  std::vector<Link *> link_vec;
 };
 
 }  // namespace assets
