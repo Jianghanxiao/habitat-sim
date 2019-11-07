@@ -56,6 +56,12 @@ typedef struct coordinate
     double z = 0;
 } Coordinate;
 
+typedef struct limit
+{
+    bool has_limit = false;
+    double lower;
+    double upper;
+} Limit;
 
 typedef struct link
 {
@@ -71,6 +77,8 @@ typedef struct joint
     std::string parent_name = "";
     std::string child_name = "";
     Coordinate origin;
+    Limit limit;
+    Coordinate axis;
 } Joint;
 
 /**

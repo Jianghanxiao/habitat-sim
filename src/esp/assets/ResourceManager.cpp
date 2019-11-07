@@ -881,7 +881,7 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
 
       // Parse the origin for link-visual and joint
       index = line.find("<origin");
-      if(index!= -1)
+      if(index != -1)
       {
         int origin_index1 = line.find("\"");
         int origin_index2 = line.find("\"", origin_index1 + 1);
@@ -907,6 +907,42 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
           link_vec[link_vec.size() - 1]->origin.y = origin_y;
           link_vec[link_vec.size() - 1]->origin.z = origin_z;
         }
+      }
+
+      // Parse the limit for joint
+      index = line.find("<limit");
+      if(index != -1 && is_joint == true)
+      {
+        int lower_index1 = line.find("\"");
+        int lower_index2 = line.find("\"", lower_index1 + 1);
+        std::string lower = line.substr(lower_index1 + 1, lower_index2 - lower_index1 - 1);
+
+        int upper_index1 = line.find("\"", lower_index2 + 1);
+        int upper_index2 = line.find("\"", upper_index1 + 1);
+        std::string upper = line.substr(upper_index1 + 1, upper_index2 - upper_index1 - 1);
+
+        joint_vec[joint_vec.size() - 1]->limit.has_limit = true;
+        joint_vec[joint_vec.size() - 1]->limit.lower = std::stod(lower);
+        joint_vec[joint_vec.size() - 1]->limit.upper = std::stod(upper);
+      }
+
+      // Parse the axis for joint
+      index = line.find("<axis");
+      if(index != -1 && is_joint == true)
+      {
+        int axis_index1 = line.find("\"");
+        int axis_index2 = line.find("\"", axis_index1 + 1);
+        std::string axis = line.substr(axis_index1 + 1, axis_index2 - axis_index1 - 1);
+
+        std::string::size_type s1; 
+        std::string::size_type s2;
+        double axis_x = std::stod(axis, &s1);
+        double axis_y = std::stod(axis.substr(s1), &s2);
+        double axis_z = std::stod((axis.substr(s1)).substr(s2));
+
+        joint_vec[joint_vec.size() - 1]->axis.x = axis_x;
+        joint_vec[joint_vec.size() - 1]->axis.y = axis_y;
+        joint_vec[joint_vec.size() - 1]->axis.z = axis_z;
       }
     }
   }
