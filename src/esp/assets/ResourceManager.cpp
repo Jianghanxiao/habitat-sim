@@ -800,7 +800,8 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
   int index = -1;
   int name_index1 = -1;
   int name_index2 = -1;
-  bool is_link = false, is_joint = false;
+  bool is_link = false, is_visual = false;
+  bool is_joint = false;
   std::vector<Joint *> joint_vec;
   std::map<std::string, Link *> name_link_map;
 
@@ -820,9 +821,23 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
         link_vec[link_vec.size() - 1]->link_name = line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
         name_link_map[link_vec[link_vec.size() - 1]->link_name] = link_vec[link_vec.size() - 1];
       }
+
+      // Judge whther this line is the visual attribute
+      index = line.find("<visual");
+      if (index != -1)
+      {
+        is_visual = true;
+      }
+
+      index = line.find("/visual>");
+      if (index != -1)
+      {
+        is_visual = false;
+      }
+
       // Get the mesh filename
       index = line.find("<mesh");
-      if (index != -1 && is_link == true)
+      if (index != -1 && is_link == true && is_visual == true)
       {
         name_index1 = line.find("\"");
         name_index2 = line.find("\"", name_index1 + 1);
@@ -830,7 +845,7 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
         //std::cout << name_link_map[link_vec[link_vec.size() - 1]->link_name] << "; " << link_vec[link_vec.size() - 1] << "\n";
       }
 
-      index = line.find("</link");
+      index = line.find("/link>");
       if (index != -1)
       {
         is_link = false;
@@ -860,7 +875,7 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
         joint_vec[joint_vec.size() - 1]->child_name = line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
       }
 
-      index = line.find("</joint");
+      index = line.find("/joint>");
       if (index != -1)
       {
         is_joint = false;
