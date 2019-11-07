@@ -49,10 +49,19 @@ class RigidObject;
 }  // namespace physics
 namespace assets {
 
+typedef struct coordinate
+{
+    double x = 0;
+    double y = 0;
+    double z = 0;
+} Coordinate;
+
+
 typedef struct link
 {
     std::string link_name = "";
     std::string mesh_name = "";
+    Coordinate origin;
     struct link *parent_link = NULL;
     std::vector<struct link *> child_link;
 } Link;
@@ -61,6 +70,7 @@ typedef struct joint
 {
     std::string parent_name = "";
     std::string child_name = "";
+    Coordinate origin;
 } Joint;
 
 /**

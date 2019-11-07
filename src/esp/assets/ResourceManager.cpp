@@ -798,8 +798,6 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
   // Parse the URDF
   std::string line;
   int index = -1;
-  int name_index1 = -1;
-  int name_index2 = -1;
   bool is_link = false, is_visual = false;
   bool is_joint = false;
   std::vector<Joint *> joint_vec;
@@ -815,8 +813,8 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
       if (index != -1)
       {
         is_link = true;
-        name_index1 = line.find("\"");
-        name_index2 = line.find("\"", name_index1 + 1);
+        int name_index1 = line.find("\"");
+        int name_index2 = line.find("\"", name_index1 + 1);
         link_vec.push_back(new Link);
         link_vec[link_vec.size() - 1]->link_name = line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
         name_link_map[link_vec[link_vec.size() - 1]->link_name] = link_vec[link_vec.size() - 1];
@@ -839,8 +837,8 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
       index = line.find("<mesh");
       if (index != -1 && is_link == true && is_visual == true)
       {
-        name_index1 = line.find("\"");
-        name_index2 = line.find("\"", name_index1 + 1);
+        int name_index1 = line.find("\"");
+        int name_index2 = line.find("\"", name_index1 + 1);
         link_vec[link_vec.size() - 1]->mesh_name = line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
         //std::cout << name_link_map[link_vec[link_vec.size() - 1]->link_name] << "; " << link_vec[link_vec.size() - 1] << "\n";
       }
@@ -862,16 +860,16 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
       index = line.find("<parent");
       if (index != -1 && is_joint == true)
       {
-        name_index1 = line.find("\"");
-        name_index2 = line.find("\"", name_index1 + 1);
+        int name_index1 = line.find("\"");
+        int name_index2 = line.find("\"", name_index1 + 1);
         joint_vec[joint_vec.size() - 1]->parent_name = line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
       }
       // Get the child name
       index = line.find("<child");
       if (index != -1 && is_joint == true)
       {
-        name_index1 = line.find("\"");
-        name_index2 = line.find("\"", name_index1 + 1);
+        int name_index1 = line.find("\"");
+        int name_index2 = line.find("\"", name_index1 + 1);
         joint_vec[joint_vec.size() - 1]->child_name = line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
       }
 
@@ -879,6 +877,36 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
       if (index != -1)
       {
         is_joint = false;
+      }
+
+      // Parse the origin for link-visual and joint
+      index = line.find("<origin");
+      if(index!= -1)
+      {
+        int origin_index1 = line.find("\"");
+        int origin_index2 = line.find("\"", origin_index1 + 1);
+        std::string origin = line.substr(origin_index1 + 1, origin_index2 - origin_index1 - 1);
+
+        std::string::size_type s1; 
+        std::string::size_type s2;
+        double origin_x = std::stod(origin, &s1);
+        double origin_y = std::stod(origin.substr(s1), &s2);
+        double origin_z = std::stod((origin.substr(s1)).substr(s2));
+        
+        // Judge whether the origin is defined in the joint
+        if(is_joint == true)
+        {
+          joint_vec[joint_vec.size() - 1]->origin.x = origin_x;
+          joint_vec[joint_vec.size() - 1]->origin.y = origin_y;
+          joint_vec[joint_vec.size() - 1]->origin.z = origin_z;
+        }
+        // Judge whether the origin is defined in the link and in the visual part
+        else if(is_link == true && is_visual == true)
+        {
+          link_vec[link_vec.size() - 1]->origin.x = origin_x;
+          link_vec[link_vec.size() - 1]->origin.y = origin_y;
+          link_vec[link_vec.size() - 1]->origin.z = origin_z;
+        }
       }
     }
   }
