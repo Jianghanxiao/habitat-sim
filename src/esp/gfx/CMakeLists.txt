@@ -22,15 +22,6 @@ set(gfx_SOURCES
   RenderTarget.h
 )
 
-# If GUI build, add Viewer source
-# TODO(MS) Viewer really ought to be in separate module that is disabled
-if(BUILD_GUI_VIEWERS)
-  list(APPEND gfx_SOURCES
-    Viewer.cpp
-    Viewer.h
-  )
-endif()
-
 # If ptex support is enabled add relevant source files
 if(BUILD_PTEX_SUPPORT)
   list(APPEND gfx_SOURCES
@@ -54,7 +45,6 @@ find_package(Magnum
     SceneGraph
     Shaders
     Trade
-    DebugTools
     AnyImageConverter
 )
 
@@ -87,16 +77,15 @@ target_include_directories(gfx
 )
 
 if(BUILD_WITH_CUDA)
-  find_package(CUDA 8.0 REQUIRED)
   target_include_directories(gfx
     PRIVATE
-      ${CUDA_INCLUDE_DIRS}
+      ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
       ${CMAKE_CURRENT_LIST_DIR}/cuda_helpers
   )
 
   target_link_libraries(gfx
     PUBLIC
-      ${CUDA_LIBRARIES}
+      ${CUDART_LIBRARY}
   )
 endif()
 
@@ -120,7 +109,6 @@ target_link_libraries(gfx
     MagnumPlugins::TinyGltfImporter
     MagnumIntegration::Eigen
     Corrade::Utility
-    Magnum::DebugTools
     Magnum::AnyImageConverter
 )
 

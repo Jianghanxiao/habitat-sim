@@ -124,6 +124,33 @@ class Simulator {
   std::vector<int> getExistingObjectIDs(const int sceneID = 0);
 
   /**
+   * @brief Get the @ref esp::physics::MotionType of an object.
+   * See @ref esp::physics::PhysicsManager::getExistingObjectIDs.
+   * @param objectID The ID of the object identifying it in @ref
+   * esp::physics::PhysicsManager::existingObjects_.
+   * @param sceneID !! Not used currently !! Specifies which physical scene to
+   * query.
+   * @return The @ref esp::physics::MotionType of the object or @ref
+   * esp::physics::MotionType::ERROR_MOTIONTYPE if query failed.
+   */
+  esp::physics::MotionType getObjectMotionType(const int objectID,
+                                               const int sceneID = 0);
+
+  /**
+   * @brief Set the @ref esp::physics::MotionType of an object.
+   * See @ref esp::physics::PhysicsManager::getExistingObjectIDs.
+   * @param motionType The desired motion type of the object
+   * @param objectID The ID of the object identifying it in @ref
+   * esp::physics::PhysicsManager::existingObjects_.
+   * @param sceneID !! Not used currently !! Specifies which physical scene to
+   * query.
+   * @return whether or not the set was successful.
+   */
+  bool setObjectMotionType(const esp::physics::MotionType& motionType,
+                           const int objectID,
+                           const int sceneID = 0);
+
+  /**
    * @brief Apply torque to an object. See @ref
    * esp::physics::PhysicsManager::applyTorque.
    * @param tau The desired torque to apply.

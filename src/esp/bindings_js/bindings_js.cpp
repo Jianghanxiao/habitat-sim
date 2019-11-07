@@ -51,6 +51,8 @@ EMSCRIPTEN_BINDINGS(habitat_sim_bindings_js) {
   em::register_vector<SensorSpec::ptr>("VectorSensorSpec");
   em::register_vector<size_t>("VectorSizeT");
   em::register_vector<std::string>("VectorString");
+  em::register_vector<std::shared_ptr<SemanticCategory>>(
+      "VectorSemanticCategories");
   em::register_vector<std::shared_ptr<SemanticObject>>("VectorSemanticObjects");
 
   em::register_map<std::string, float>("MapStringFloat");
@@ -145,6 +147,7 @@ EMSCRIPTEN_BINDINGS(habitat_sim_bindings_js) {
       .property("position", &SensorSpec::position)
       .property("orientation", &SensorSpec::orientation)
       .property("resolution", &SensorSpec::resolution)
+      .property("channels", &SensorSpec::channels)
       .property("parameters", &SensorSpec::parameters);
 
   em::class_<Sensor>("Sensor").function("specification",
@@ -210,6 +213,7 @@ EMSCRIPTEN_BINDINGS(habitat_sim_bindings_js) {
 
   em::class_<SemanticScene>("SemanticScene")
       .smart_ptr<SemanticScene::ptr>("SemanticScene::ptr")
+      .property("categories", &SemanticScene::categories)
       .property("objects", &SemanticScene::objects);
 
   em::class_<Simulator>("SimulatorBase")
