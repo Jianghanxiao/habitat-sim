@@ -826,7 +826,7 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
       {
         name_index1 = line.find("\"");
         name_index2 = line.find("\"", name_index1 + 1);
-        link_vec[link_vec.size() - 1]->mesh_name = "/Users/apple/Desktop/Habitat-sim_Project/habitat-sim/" + line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
+        link_vec[link_vec.size() - 1]->mesh_name = line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
         //std::cout << name_link_map[link_vec[link_vec.size() - 1]->link_name] << "; " << link_vec[link_vec.size() - 1] << "\n";
       }
 
