@@ -69,6 +69,14 @@ typedef struct link
     std::string link_name = "";
     std::string mesh_name = "";
     Coordinate origin;
+    
+    // Store the articulations information
+    std::string joint_type = "fixed";
+    Coordinate joint_origin; // Relative to the link itself
+    Limit limit;
+    Coordinate axis;
+
+    // Store the parent and child link
     struct link *parent_link = NULL;
     std::vector<struct link *> child_link;
 } Link;
@@ -77,6 +85,7 @@ typedef struct joint
 {
     std::string parent_name = "";
     std::string child_name = "";
+    std::string joint_type = "fixed";
     Coordinate origin;
     Limit limit;
     Coordinate axis;

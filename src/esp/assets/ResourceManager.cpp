@@ -852,6 +852,20 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
         is_joint = true;
         joint_vec.push_back(new Joint);
       }
+
+      // Get the joint type
+      index = line.find("type");
+      if(index != -1 && is_joint == true)
+      {
+        // First two index for joint name
+        int name_index1 = line.find("\"");
+        int name_index2 = line.find("\"", name_index1 + 1);
+        // Index 3 and 4 for joint type
+        int name_index3 = line.find("\"", name_index2 + 1);
+        int name_index4 = line.find("\"", name_index3 + 1);
+        joint_vec[joint_vec.size() - 1]->joint_type = line.substr(name_index3 + 1, name_index4 - name_index3 - 1);
+      }
+
       // Get the parent name
       index = line.find("<parent");
       if (index != -1 && is_joint == true)
@@ -952,6 +966,16 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
       Link *parent = name_link_map[parent_name];
       Link *children = name_link_map[children_name];
 
+      // Add the articulation information
+      children->joint_type = joint_vec[i]->joint_type;
+      children->limit = joint_vec[i]->limit;
+      children->axis = joint_vec[i]->axis;
+      // Convert the coordinate from the parent link frame to the children link frame
+      children->joint_origin.x = joint_vec[i]->origin.x + parent->origin.x - children->origin.x;
+      children->joint_origin.y = joint_vec[i]->origin.y + parent->origin.y - children->origin.y;
+      children->joint_origin.z = joint_vec[i]->origin.z + parent->origin.z - children->origin.z;
+
+      // Update the hierarchy tree
       children->parent_link = parent;
       parent->child_link.push_back(children);
       //std::cout <<parent_name << "; " << children_name << "\n";
