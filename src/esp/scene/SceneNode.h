@@ -75,6 +75,10 @@ class SceneNode : public MagnumObject {
   //! set local bounding box for meshes stored at this node
   void setMeshBB(Magnum::Range3D meshBB) { meshBB_ = meshBB; };
 
+  //! Articulation information for URDF
+  void setLinkName(std::string link_name) { link_name_ = link_name; };
+  std::string getLinkName() { return link_name_; };
+
  protected:
   // DO not make the following constructor public!
   // it can ONLY be called from SceneGraph class to initialize the scene graph
@@ -91,6 +95,10 @@ class SceneNode : public MagnumObject {
   //! the cumulative bounding box of the full scene graph tree for which this
   //! node is the root
   Magnum::Range3D cumulativeBB_;
+
+  // Articulations information for URDF interaction
+  std::string link_name_ = "";
+
 };
 
 }  // namespace scene

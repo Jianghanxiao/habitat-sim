@@ -225,6 +225,10 @@ class ResourceManager {
 
   void loadURDFMesh(Link *node, scene::SceneNode* parent, Magnum::SceneGraph::DrawableGroup3D* drawables);
 
+  bool loadURDFMeshData(const AssetInfo& info,
+                           scene::SceneNode* child = nullptr,
+                           DrawableGroup* drawables = nullptr);
+
   // load the mesh data
   // If parent, also do scene graph
   bool loadGeneralMeshData(const AssetInfo& info,

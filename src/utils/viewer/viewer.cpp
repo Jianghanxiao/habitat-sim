@@ -64,6 +64,8 @@ class Viewer : public Magnum::Platform::Application {
   void keyPressEvent(KeyEvent& event) override;
 
   // Interactive functions
+  // Test function
+  void interactWithScene();
   void addObject(std::string configFile);
   void pokeLastObject();
   void pushLastObject();
@@ -496,8 +498,23 @@ void Viewer::keyPressEvent(KeyEvent& event) {
       break;
     case KeyEvent::Key::T:
       // Test key. Put what you want here...
-      torqueLastObject();
+      interactWithScene();
       break;
+    case KeyEvent::Key::Y: {
+      // Test key. Put what you want here...
+      auto* child = navSceneNode_->children().first()->children().first()->children().first();
+      while(child != NULL)
+      {
+        scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
+        if(child_node->getLinkName() != "")
+          break;
+        // LOG(INFO) << child_node->getLinkName();
+        child = child->nextSibling();
+      }
+      scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
+      // LOG(INFO) << child_node->getLinkName();
+      controls_(*child_node, "moveBackward", moveSensitivity);
+    } break;
     case KeyEvent::Key::I:
       Magnum::DebugTools::screenshot(GL::defaultFramebuffer,
                                      "test_image_save.png");
@@ -517,6 +534,17 @@ void Viewer::keyPressEvent(KeyEvent& event) {
       rgbSensorNode_->absoluteTransformation());
   redraw();
 }
+
+void Viewer::interactWithScene()
+{
+  auto* child = navSceneNode_;
+  scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
+  controls_(*child_node, "turnRight", lookSensitivity);
+}
+
+
+
+
 
 }  // namespace
 
