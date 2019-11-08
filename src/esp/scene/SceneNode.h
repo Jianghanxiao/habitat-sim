@@ -94,6 +94,18 @@ class SceneNode : public MagnumObject {
   void setLinkName(std::string link_name) { link_name_ = link_name; };
   std::string getLinkName() { return link_name_; };
 
+  void setJointType(std::string joint_type) { joint_type_ = joint_type; };
+  std::string getJointType() { return joint_type_; };
+
+  void setJointOrigin(Coordinate joint_origin) { joint_origin_ = joint_origin; };
+  Coordinate getJointOrigin() { return joint_origin_; };
+
+  void setJointLimit(Limit joint_limit) { joint_limit_ = joint_limit; };
+  Limit getJointLimit() { return joint_limit_; };
+
+  void setJointAxis(Coordinate joint_axis) { joint_axis_ = joint_axis; };
+  Coordinate getJointAxis() { return joint_axis_; };
+
  protected:
   // DO not make the following constructor public!
   // it can ONLY be called from SceneGraph class to initialize the scene graph
@@ -113,9 +125,11 @@ class SceneNode : public MagnumObject {
 
   // Articulations information for URDF interaction
   std::string link_name_ = "";
-  std::string joint_type = "fixed";
+  std::string joint_type_ = "fixed";
   
-  
+  Coordinate joint_origin_; // Relative to the link itself
+  Limit joint_limit_;
+  Coordinate joint_axis_;
 };
 
 }  // namespace scene

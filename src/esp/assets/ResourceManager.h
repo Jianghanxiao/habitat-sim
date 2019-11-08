@@ -59,8 +59,8 @@ typedef struct link
     // Store the articulations information
     std::string joint_type = "fixed";
     scene::Coordinate joint_origin; // Relative to the link itself
-    scene::Limit limit;
-    scene::Coordinate axis;
+    scene::Limit joint_limit;
+    scene::Coordinate joint_axis;
 
     // Store the parent and child link
     struct link *parent_link = NULL;

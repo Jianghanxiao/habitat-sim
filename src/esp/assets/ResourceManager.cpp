@@ -968,8 +968,8 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
 
       // Add the articulation information
       children->joint_type = joint_vec[i]->joint_type;
-      children->limit = joint_vec[i]->limit;
-      children->axis = joint_vec[i]->axis;
+      children->joint_limit = joint_vec[i]->limit;
+      children->joint_axis = joint_vec[i]->axis;
       // Convert the coordinate from the parent link frame to the children link frame
       children->joint_origin.x = joint_vec[i]->origin.x + parent->origin.x - children->origin.x;
       children->joint_origin.y = joint_vec[i]->origin.y + parent->origin.y - children->origin.y;
@@ -1016,6 +1016,10 @@ void ResourceManager::loadURDFMesh(Link *node, scene::SceneNode* parent, Magnum:
 
   scene::SceneNode* child = &parent->createChild();
   child->setLinkName(node->link_name);
+  child->setJointType(node->joint_type);
+  child->setJointOrigin(node->joint_origin);
+  child->setJointLimit(node->joint_limit);
+  child->setJointAxis(node->joint_axis);
 
   if(file != "") {
     const assets::AssetInfo info = assets::AssetInfo::fromPath(file);
