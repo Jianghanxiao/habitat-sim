@@ -50,31 +50,17 @@ class RigidObject;
 }  // namespace physics
 namespace assets {
 
-typedef struct coordinate
-{
-    double x = 0;
-    double y = 0;
-    double z = 0;
-} Coordinate;
-
-typedef struct limit
-{
-    bool has_limit = false;
-    double lower;
-    double upper;
-} Limit;
-
 typedef struct link
 {
     std::string link_name = "";
     std::string mesh_name = "";
-    Coordinate origin;
+    scene::Coordinate origin;
     
     // Store the articulations information
     std::string joint_type = "fixed";
-    Coordinate joint_origin; // Relative to the link itself
-    Limit limit;
-    Coordinate axis;
+    scene::Coordinate joint_origin; // Relative to the link itself
+    scene::Limit limit;
+    scene::Coordinate axis;
 
     // Store the parent and child link
     struct link *parent_link = NULL;
@@ -86,9 +72,9 @@ typedef struct joint
     std::string parent_name = "";
     std::string child_name = "";
     std::string joint_type = "fixed";
-    Coordinate origin;
-    Limit limit;
-    Coordinate axis;
+    scene::Coordinate origin;
+    scene::Limit limit;
+    scene::Coordinate axis;
 } Joint;
 
 /**

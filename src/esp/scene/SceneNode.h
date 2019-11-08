@@ -16,6 +16,21 @@
 namespace esp {
 namespace scene {
 
+// Struct for URDF
+typedef struct coordinate
+{
+    double x = 0;
+    double y = 0;
+    double z = 0;
+} Coordinate;
+
+typedef struct limit
+{
+    bool has_limit = false;
+    double lower;
+    double upper;
+} Limit;
+
 class SceneGraph;
 
 // Future types may include e.g., "LIGHT"
@@ -98,7 +113,9 @@ class SceneNode : public MagnumObject {
 
   // Articulations information for URDF interaction
   std::string link_name_ = "";
-
+  std::string joint_type = "fixed";
+  
+  
 };
 
 }  // namespace scene
