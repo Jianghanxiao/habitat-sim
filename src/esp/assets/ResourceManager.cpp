@@ -971,9 +971,9 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
       children->joint_limit = joint_vec[i]->limit;
       children->joint_axis = joint_vec[i]->axis;
       // Convert the coordinate from the parent link frame to the children link frame
-      children->joint_origin.x = joint_vec[i]->origin.x + parent->origin.x - children->origin.x;
-      children->joint_origin.y = joint_vec[i]->origin.y + parent->origin.y - children->origin.y;
-      children->joint_origin.z = joint_vec[i]->origin.z + parent->origin.z - children->origin.z;
+      children->joint_origin.x = children->origin.x;
+      children->joint_origin.y = children->origin.y;
+      children->joint_origin.z = children->origin.z;
 
       // Update the hierarchy tree
       children->parent_link = parent;

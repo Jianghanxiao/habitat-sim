@@ -566,7 +566,25 @@ void Viewer::keyPressEvent(KeyEvent& event) {
           scene::Limit joint_limit = currentJoint->getJointLimit();
           double current_value = currentJoint->getCurrentValue();
 
-          
+          //This is in radius
+          float rotateUnit = lookSensitivity;
+          if(joint_limit.has_limit == true) {
+            rotateUnit = std::max(std::abs(joint_limit.lower), std::abs(joint_limit.upper)) / 20;
+          }
+
+          if(current_value + rotateUnit <= joint_limit.upper) {
+            auto& object = *currentJoint;
+            object.translateLocal((-joint_origin.x * object.transformation().right()) + (-joint_origin.y * object.transformation().up()) + (-joint_origin.z * object.transformation().backward()));
+            
+            object.rotate(Magnum::Rad(rotateUnit), Magnum::Vector3(joint_axis.x, joint_axis.y, joint_axis.z));
+            //LOG(INFO) << joint_origin.x << " " << joint_origin.y << " " << joint_origin.z;
+
+            object.translateLocal((joint_origin.x * object.transformation().right()) + (joint_origin.y * object.transformation().up()) + (joint_origin.z * object.transformation().backward()));
+            currentJoint->setCurrentValue(current_value + rotateUnit);
+          }
+          else {
+            LOG(WARNING) << "Has reached max range";
+          }
         }
       }
       else {
@@ -590,6 +608,30 @@ void Viewer::keyPressEvent(KeyEvent& event) {
             auto& object = *currentJoint;
             object.translateLocal(((joint_axis.x * object.transformation().right()) + (joint_axis.y * object.transformation().up()) + (joint_axis.z * object.transformation().backward())) * (-moveUnit));
             currentJoint->setCurrentValue(current_value - moveUnit);
+          }
+          else {
+            LOG(WARNING) << "Has reached min range";
+          }
+        } else if(currentJoint->getJointType() == "revolute") {
+          scene::Coordinate joint_origin = currentJoint->getJointOrigin();
+          scene::Coordinate joint_axis = currentJoint->getJointAxis();
+          scene::Limit joint_limit = currentJoint->getJointLimit();
+          double current_value = currentJoint->getCurrentValue();
+
+          //This is in radius
+          float rotateUnit = lookSensitivity;
+          if(joint_limit.has_limit == true) {
+            rotateUnit = std::max(std::abs(joint_limit.lower), std::abs(joint_limit.upper)) / 20;
+          }
+
+          if(current_value - rotateUnit >= joint_limit.lower) {
+            auto& object = *currentJoint;
+            object.translateLocal((-joint_origin.x * object.transformation().right()) + (-joint_origin.y * object.transformation().up()) + (-joint_origin.z * object.transformation().backward()));
+            
+            object.rotateLocal(Magnum::Rad(-rotateUnit), Magnum::Vector3(joint_axis.x, joint_axis.y, joint_axis.z));
+
+            object.translateLocal((joint_origin.x * object.transformation().right()) + (joint_origin.y * object.transformation().up()) + (joint_origin.z * object.transformation().backward()));
+            currentJoint->setCurrentValue(current_value - rotateUnit);
           }
           else {
             LOG(WARNING) << "Has reached min range";
