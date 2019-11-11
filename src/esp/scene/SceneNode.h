@@ -106,6 +106,9 @@ class SceneNode : public MagnumObject {
   void setJointAxis(Coordinate joint_axis) { joint_axis_ = joint_axis; };
   Coordinate getJointAxis() { return joint_axis_; };
 
+  void setCurrentValue(double current_value) { current_value_ = current_value; };
+  double getCurrentValue() { return current_value_; };
+
  protected:
   // DO not make the following constructor public!
   // it can ONLY be called from SceneGraph class to initialize the scene graph
@@ -130,6 +133,8 @@ class SceneNode : public MagnumObject {
   Coordinate joint_origin_; // Relative to the link itself
   Limit joint_limit_;
   Coordinate joint_axis_;
+
+  double current_value_ = 0;
 };
 
 }  // namespace scene

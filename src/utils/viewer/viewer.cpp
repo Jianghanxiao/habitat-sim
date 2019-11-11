@@ -64,8 +64,13 @@ class Viewer : public Magnum::Platform::Application {
   void keyPressEvent(KeyEvent& event) override;
 
   // Interactive functions
+
+  // URDF viewer functions
+  // Used to choose next movable joints
+  void nextJoint();
+  void getJointNodes();
+
   // Test function
-  void interactWithScene();
   void addObject(std::string configFile);
   void pokeLastObject();
   void pushLastObject();
@@ -107,6 +112,11 @@ class Viewer : public Magnum::Platform::Application {
   bool drawObjectBBs = false;
 
   Magnum::Timeline timeline_;
+
+  // URDF Variables
+  bool enterURDFMode_ = false;
+  std::vector<scene::SceneNode*> joints_;
+  int current_joint_ = 0;
 };
 
 Viewer::Viewer(const Arguments& arguments)
@@ -498,23 +508,113 @@ void Viewer::keyPressEvent(KeyEvent& event) {
       break;
     case KeyEvent::Key::T:
       // Test key. Put what you want here...
-      interactWithScene();
       break;
-    case KeyEvent::Key::Y: {
-      // Test key. Put what you want here...
-      auto* child = navSceneNode_->children().first()->children().first()->children().first();
-      while(child != NULL)
+    case KeyEvent::Key::E:
+      if(enterURDFMode_ == false)
       {
-        scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
-        if(child_node->getLinkName() != "")
-          break;
-        // LOG(INFO) << child_node->getLinkName();
-        child = child->nextSibling();
+        LOG(INFO) << "Enter URDF Interaction Mode; Use J to turn into next joint, N and M to control the joint";
+        getJointNodes();
+        if (joints_.size() != 0) {
+          LOG(INFO) << "There are " << joints_.size() << " joints for this model";
+          enterURDFMode_ = true;
+          current_joint_ = 0;
+          LOG(INFO) << "Current Joint: " << joints_[current_joint_]->getLinkName();
+        }
+        else {
+           LOG(WARNING) << "No available joints. Failed in entering URDF Interaction Mode";
+        }
       }
-      scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
-      // LOG(INFO) << child_node->getLinkName();
-      controls_(*child_node, "moveBackward", moveSensitivity);
+      else
+      {
+        LOG(INFO) << "Exit URDF Interaction Mode";
+        enterURDFMode_ = false;
+      }
+      break;
+    case KeyEvent::Key::J: {
+      if(enterURDFMode_ == true) { 
+        nextJoint();
+        LOG(INFO) << "Current Joint: " << joints_[current_joint_]->getLinkName();
+      }
+      else {
+        LOG(INFO) << "Please Enter URDF Interaction Mode Firstly (Using E)";
+      }
     } break;
+    case KeyEvent::Key::N: {
+      if(enterURDFMode_ == true) { 
+        scene::SceneNode* currentJoint = joints_[current_joint_];
+        if (currentJoint->getJointType() == "prismatic") {
+          scene::Coordinate joint_axis = currentJoint->getJointAxis();
+          scene::Limit joint_limit = currentJoint->getJointLimit();
+          double current_value = currentJoint->getCurrentValue();
+
+          float moveUnit = moveSensitivity;
+          if(joint_limit.has_limit == true) {
+            moveUnit = std::max(std::abs(joint_limit.lower), std::abs(joint_limit.upper)) / 10;
+          }
+          
+          if(current_value + moveUnit <= joint_limit.upper) {
+            auto& object = *currentJoint;
+            object.translateLocal(((joint_axis.x * object.transformation().right()) + (joint_axis.y * object.transformation().up()) + (joint_axis.z * object.transformation().backward())) * moveUnit);
+            currentJoint->setCurrentValue(current_value + moveUnit);
+          }
+          else {
+            LOG(WARNING) << "Has reached max range";
+          }
+        } else if(currentJoint->getJointType() == "revolute") {
+          scene::Coordinate joint_origin = currentJoint->getJointOrigin();
+          scene::Coordinate joint_axis = currentJoint->getJointAxis();
+          scene::Limit joint_limit = currentJoint->getJointLimit();
+          double current_value = currentJoint->getCurrentValue();
+
+          
+        }
+      }
+      else {
+        LOG(INFO) << "Please Enter URDF Interaction Mode Firstly (Using E)";
+      }
+    } break;
+    case KeyEvent::Key::M: {
+      if(enterURDFMode_ == true) { 
+        scene::SceneNode* currentJoint = joints_[current_joint_];
+        if (currentJoint->getJointType() == "prismatic") {
+          scene::Coordinate joint_axis = currentJoint->getJointAxis();
+          scene::Limit joint_limit = currentJoint->getJointLimit();
+          double current_value = currentJoint->getCurrentValue();
+
+          float moveUnit = moveSensitivity;
+          if(joint_limit.has_limit == true) {
+            moveUnit = std::max(std::abs(joint_limit.lower), std::abs(joint_limit.upper)) / 10;
+          }
+          
+          if(current_value - moveUnit >= joint_limit.lower) {
+            auto& object = *currentJoint;
+            object.translateLocal(((joint_axis.x * object.transformation().right()) + (joint_axis.y * object.transformation().up()) + (joint_axis.z * object.transformation().backward())) * (-moveUnit));
+            currentJoint->setCurrentValue(current_value - moveUnit);
+          }
+          else {
+            LOG(WARNING) << "Has reached min range";
+          }
+        }
+      }
+      else {
+        LOG(INFO) << "Please Enter URDF Interaction Mode Firstly (Using E)";
+      }
+    } break;
+    // case KeyEvent::Key::Y: {
+    //   // Test key. Put what you want here...
+    //   auto* child = navSceneNode_->children().first()->children().first()->children().first();
+    //   while(child != NULL)
+    //   {
+    //     scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
+    //     if(child_node->getLinkName() != "")
+    //       break;
+    //     LOG(INFO) << child_node->getLinkName();
+    //     child = child->nextSibling();
+    //   }
+    //   scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
+    //   // LOG(INFO) << child_node->getLinkName();
+    //   controls_(*child_node, "moveBackward", moveSensitivity);
+    // } break;
     case KeyEvent::Key::I:
       Magnum::DebugTools::screenshot(GL::defaultFramebuffer,
                                      "test_image_save.png");
@@ -535,12 +635,42 @@ void Viewer::keyPressEvent(KeyEvent& event) {
   redraw();
 }
 
-void Viewer::interactWithScene()
-{
-  auto* child = navSceneNode_;
-  scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
-  controls_(*child_node, "turnRight", lookSensitivity);
+void Viewer::getJointNodes() {
+  joints_.clear();
+  std::vector<scene::SceneNode*> nodeList;
+  nodeList.push_back(navSceneNode_);
+  int head_ptr = 0;
+  while (head_ptr < nodeList.size())
+  {
+    scene::SceneNode* currentSceneNode = nodeList[head_ptr];
+    auto* child = currentSceneNode->children().first();
+    while (child != nullptr) {
+      scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
+      if (child_node != nullptr) {
+        nodeList.push_back(child_node);
+        if (child_node->getJointType() != "fixed") {
+          joints_.push_back(child_node);
+        }
+      }
+      child = child->nextSibling();
+    }
+    head_ptr ++;
+  }
 }
+
+void Viewer::nextJoint() {
+  current_joint_ += 1;
+  if(current_joint_ == joints_.size()) {
+    current_joint_ -= joints_.size();
+  }
+}
+
+// void Viewer::interactWithScene()
+// {
+//   auto* child = navSceneNode_;
+//   scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
+//   controls_(*child_node, "turnRight", lookSensitivity);
+// }
 
 
 
