@@ -114,12 +114,13 @@ class Viewer : public Magnum::Platform::Application {
 
   Magnum::Timeline timeline_;
 
+  ImGuiIntegration::Context imgui_{NoCreate};
+  bool showFPS_ = false;
+
   // URDF Variables
   bool enterURDFMode_ = false;
   std::vector<scene::SceneNode*> joints_;
   int current_joint_ = 0;
-  ImGuiIntegration::Context imgui_{NoCreate};
-  bool showFPS_ = false;
 };
 
 Viewer::Viewer(const Arguments& arguments)
