@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include <Magnum/configure.h>
+#include <Magnum/ImGuiIntegration/Context.hpp>
 #ifdef MAGNUM_TARGET_WEBGL
 #include <Magnum/Platform/EmscriptenApplication.h>
 #else
@@ -117,6 +118,8 @@ class Viewer : public Magnum::Platform::Application {
   bool enterURDFMode_ = false;
   std::vector<scene::SceneNode*> joints_;
   int current_joint_ = 0;
+  ImGuiIntegration::Context imgui_{NoCreate};
+  bool showFPS_ = false;
 };
 
 Viewer::Viewer(const Arguments& arguments)
@@ -145,6 +148,18 @@ Viewer::Viewer(const Arguments& arguments)
       .parse(arguments.argc, arguments.argv);
 
   const auto viewportSize = GL::defaultFramebuffer.viewport().size();
+
+  imgui_ = ImGuiIntegration::Context(Vector2{windowSize()} / dpiScaling(),
+                                     windowSize(), framebufferSize());
+
+  /* Set up proper blending to be used by ImGui. There's a great chance
+     you'll need this exact behavior for the rest of your scene. If not, set
+     this only for the drawFrame() call. */
+  GL::Renderer::setBlendEquation(GL::Renderer::BlendEquation::Add,
+                                 GL::Renderer::BlendEquation::Add);
+  GL::Renderer::setBlendFunction(
+      GL::Renderer::BlendFunction::SourceAlpha,
+      GL::Renderer::BlendFunction::OneMinusSourceAlpha);
 
   // Setup renderer and shader defaults
   GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
@@ -364,6 +379,34 @@ void Viewer::drawEvent() {
     physicsManager_->debugDraw(projM * camM);
   }
 
+  imgui_.newFrame();
+
+  if (showFPS_) {
+    ImGui::SetNextWindowPos(ImVec2(10, 10));
+    ImGui::Begin("main", NULL,
+                 ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground |
+                     ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SetWindowFontScale(2.0);
+    ImGui::Text("%.1f FPS", Double(ImGui::GetIO().Framerate));
+    ImGui::End();
+  }
+
+  /* Set appropriate states. If you only draw ImGui, it is sufficient to
+     just enable blending and scissor test in the constructor. */
+  GL::Renderer::enable(GL::Renderer::Feature::Blending);
+  GL::Renderer::enable(GL::Renderer::Feature::ScissorTest);
+  GL::Renderer::disable(GL::Renderer::Feature::FaceCulling);
+  GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
+
+  imgui_.drawFrame();
+
+  /* Reset state. Only needed if you want to draw something else with
+     different state after. */
+  GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
+  GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
+  GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
+  GL::Renderer::disable(GL::Renderer::Feature::Blending);
+
   swapBuffers();
   timeline_.nextFrame();
   redraw();
@@ -372,6 +415,8 @@ void Viewer::drawEvent() {
 void Viewer::viewportEvent(ViewportEvent& event) {
   GL::defaultFramebuffer.setViewport({{}, framebufferSize()});
   renderCamera_->getMagnumCamera().setViewport(event.windowSize());
+  imgui_.relayout(Vector2{event.windowSize()} / event.dpiScaling(),
+                  event.windowSize(), event.framebufferSize());
 }
 
 void Viewer::mousePressEvent(MouseEvent& event) {
@@ -458,6 +503,9 @@ void Viewer::keyPressEvent(KeyEvent& event) {
       controls_(*agentBodyNode_, "moveRight", moveSensitivity);
       LOG(INFO) << "Agent position "
                 << Eigen::Map<vec3f>(agentBodyNode_->translation().data());
+      break;
+    case KeyEvent::Key::C:
+      showFPS_ = !showFPS_;
       break;
     case KeyEvent::Key::S:
       controls_(*agentBodyNode_, "moveBackward", moveSensitivity);
