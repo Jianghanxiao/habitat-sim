@@ -16,6 +16,8 @@ set(assets_SOURCES
   Mp3dInstanceMeshData.h
   ResourceManager.cpp
   ResourceManager.h
+  URDFParser.cpp
+  URDFParser.h
 )
 
 if(BUILD_PTEX_SUPPORT)

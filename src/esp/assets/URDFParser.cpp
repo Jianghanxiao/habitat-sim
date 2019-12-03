@@ -1,0 +1,235 @@
+#include "URDFParser.h"
+#include <iostream>
+
+namespace esp {
+namespace assets {
+
+URDFParser::URDFParser(const std::string& filename) {
+  filename_ = filename;
+  root_ = NULL;
+}
+
+void URDFParser::set(const std::string& filename) {
+  filename_ = filename;
+  root_ = NULL;
+}
+
+// Parse the URDF
+bool URDFParser::parse() {
+  if (root_ != NULL) {
+    std::cout << "Some error in URDFParser!\n";
+    return false;
+  }
+
+  // load the URDF
+  const std::string& filename = filename_;
+  if (freopen(filename.c_str(), "r", stdin) == NULL) {
+    LOG(ERROR) << "Cannot open URDF file\n";
+    std::exit(1);
+  }
+
+  std::string line;
+  int index = -1;
+  bool is_link = false, is_visual = false;
+  bool is_joint = false;
+  std::vector<Link*> link_vec;
+  std::vector<Joint*> joint_vec;
+  std::map<std::string, Link*> name_link_map;
+
+  while (std::getline(std::cin, line)) {
+    if (line != "") {
+      // std::cout << line << "\n";
+      // Judge whether this line is used to define the link
+      index = line.find("<link");
+      if (index != -1) {
+        is_link = true;
+        int name_index1 = line.find("\"");
+        int name_index2 = line.find("\"", name_index1 + 1);
+        link_vec.push_back(new Link);
+        link_vec[link_vec.size() - 1]->link_name =
+            line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
+        name_link_map[link_vec[link_vec.size() - 1]->link_name] =
+            link_vec[link_vec.size() - 1];
+      }
+
+      // Judge whther this line is the visual attribute
+      index = line.find("<visual");
+      if (index != -1) {
+        is_visual = true;
+      }
+
+      index = line.find("/visual>");
+      if (index != -1) {
+        is_visual = false;
+      }
+
+      // Get the mesh filename
+      index = line.find("<mesh");
+      if (index != -1 && is_link == true && is_visual == true) {
+        int name_index1 = line.find("\"");
+        int name_index2 = line.find("\"", name_index1 + 1);
+        link_vec[link_vec.size() - 1]->mesh_name =
+            line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
+        // std::cout << name_link_map[link_vec[link_vec.size() - 1]->link_name]
+        // << "; " << link_vec[link_vec.size() - 1] << "\n";
+      }
+
+      index = line.find("/link>");
+      if (index != -1) {
+        is_link = false;
+      }
+
+      // Judge whether this line is to define a joint
+      index = line.find("<joint");
+      if (index != -1) {
+        is_joint = true;
+        joint_vec.push_back(new Joint);
+      }
+
+      // Get the joint type
+      index = line.find("type");
+      if (index != -1 && is_joint == true) {
+        // First two index for joint name
+        int name_index1 = line.find("\"");
+        int name_index2 = line.find("\"", name_index1 + 1);
+        // Index 3 and 4 for joint type
+        int name_index3 = line.find("\"", name_index2 + 1);
+        int name_index4 = line.find("\"", name_index3 + 1);
+        joint_vec[joint_vec.size() - 1]->joint_type =
+            line.substr(name_index3 + 1, name_index4 - name_index3 - 1);
+      }
+
+      // Get the parent name
+      index = line.find("<parent");
+      if (index != -1 && is_joint == true) {
+        int name_index1 = line.find("\"");
+        int name_index2 = line.find("\"", name_index1 + 1);
+        joint_vec[joint_vec.size() - 1]->parent_name =
+            line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
+      }
+      // Get the child name
+      index = line.find("<child");
+      if (index != -1 && is_joint == true) {
+        int name_index1 = line.find("\"");
+        int name_index2 = line.find("\"", name_index1 + 1);
+        joint_vec[joint_vec.size() - 1]->child_name =
+            line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
+      }
+
+      index = line.find("/joint>");
+      if (index != -1) {
+        is_joint = false;
+      }
+
+      // Parse the origin for link-visual and joint
+      index = line.find("<origin");
+      if (index != -1) {
+        int origin_index1 = line.find("\"");
+        int origin_index2 = line.find("\"", origin_index1 + 1);
+        std::string origin =
+            line.substr(origin_index1 + 1, origin_index2 - origin_index1 - 1);
+
+        std::string::size_type s1;
+        std::string::size_type s2;
+        double origin_x = std::stod(origin, &s1);
+        double origin_y = std::stod(origin.substr(s1), &s2);
+        double origin_z = std::stod((origin.substr(s1)).substr(s2));
+
+        // Judge whether the origin is defined in the joint
+        if (is_joint == true) {
+          joint_vec[joint_vec.size() - 1]->origin.x = origin_x;
+          joint_vec[joint_vec.size() - 1]->origin.y = origin_y;
+          joint_vec[joint_vec.size() - 1]->origin.z = origin_z;
+        }
+        // Judge whether the origin is defined in the link and in the visual
+        // part
+        else if (is_link == true && is_visual == true) {
+          link_vec[link_vec.size() - 1]->origin.x = origin_x;
+          link_vec[link_vec.size() - 1]->origin.y = origin_y;
+          link_vec[link_vec.size() - 1]->origin.z = origin_z;
+        }
+      }
+
+      // Parse the limit for joint
+      index = line.find("<limit");
+      if (index != -1 && is_joint == true) {
+        int lower_index1 = line.find("\"");
+        int lower_index2 = line.find("\"", lower_index1 + 1);
+        std::string lower =
+            line.substr(lower_index1 + 1, lower_index2 - lower_index1 - 1);
+
+        int upper_index1 = line.find("\"", lower_index2 + 1);
+        int upper_index2 = line.find("\"", upper_index1 + 1);
+        std::string upper =
+            line.substr(upper_index1 + 1, upper_index2 - upper_index1 - 1);
+
+        joint_vec[joint_vec.size() - 1]->limit.has_limit = true;
+        joint_vec[joint_vec.size() - 1]->limit.lower = std::stod(lower);
+        joint_vec[joint_vec.size() - 1]->limit.upper = std::stod(upper);
+      }
+
+      // Parse the axis for joint
+      index = line.find("<axis");
+      if (index != -1 && is_joint == true) {
+        int axis_index1 = line.find("\"");
+        int axis_index2 = line.find("\"", axis_index1 + 1);
+        std::string axis =
+            line.substr(axis_index1 + 1, axis_index2 - axis_index1 - 1);
+
+        std::string::size_type s1;
+        std::string::size_type s2;
+        double axis_x = std::stod(axis, &s1);
+        double axis_y = std::stod(axis.substr(s1), &s2);
+        double axis_z = std::stod((axis.substr(s1)).substr(s2));
+
+        joint_vec[joint_vec.size() - 1]->axis.x = axis_x;
+        joint_vec[joint_vec.size() - 1]->axis.y = axis_y;
+        joint_vec[joint_vec.size() - 1]->axis.z = axis_z;
+      }
+    }
+  }
+
+  // Construct the tree from link and joint
+  // The root node should be "0:virtual"
+  for (int i = 0; i <= joint_vec.size() - 1; ++i) {
+    std::string parent_name = joint_vec[i]->parent_name;
+    std::string children_name = joint_vec[i]->child_name;
+    Link* parent = name_link_map[parent_name];
+    Link* children = name_link_map[children_name];
+
+    // Add the articulation information
+    children->joint_type = joint_vec[i]->joint_type;
+    children->joint_limit = joint_vec[i]->limit;
+    children->joint_axis = joint_vec[i]->axis;
+    // Convert the coordinate from the parent link frame to the children link
+    // frame
+    children->joint_origin.x = children->origin.x;
+    children->joint_origin.y = children->origin.y;
+    children->joint_origin.z = children->origin.z;
+
+    // Update the hierarchy tree
+    children->parent_link = parent;
+    parent->child_link.push_back(children);
+    // std::cout <<parent_name << "; " << children_name << "\n";
+  }
+
+  fclose(stdin);
+
+  // Get the root node of the URDF tree
+  for (int i = 0; i <= link_vec.size() - 1; ++i) {
+    if (link_vec[i]->parent_link == NULL) {
+      root_ = link_vec[i];
+      break;
+    }
+  }
+
+  if (root_ == NULL) {
+    LOG(ERROR) << "Error format in URDF\n";
+    return false;
+  }
+
+  return true;
+}
+
+}  // namespace assets
+}  // namespace esp
