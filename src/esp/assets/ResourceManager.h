@@ -25,9 +25,9 @@
 #include "GltfMeshData.h"
 #include "MeshData.h"
 #include "MeshMetaData.h"
+#include "URDFParser.h"
 #include "esp/physics/PhysicsManager.h"
 #include "esp/scene/ArticulatedPartSceneNode.h"
-#include "URDFParser.h"
 
 // forward declarations
 namespace Magnum {
@@ -50,33 +50,6 @@ class PhysicsManager;
 class RigidObject;
 }  // namespace physics
 namespace assets {
-
-// typedef struct link
-// {
-//     std::string link_name = "";
-//     std::string mesh_name = "";
-//     scene::Coordinate origin;
-    
-//     // Store the articulations information
-//     std::string joint_type = "fixed";
-//     scene::Coordinate joint_origin; // Relative to the link itself
-//     scene::Limit joint_limit;
-//     scene::Coordinate joint_axis;
-
-//     // Store the parent and child link
-//     struct link *parent_link = NULL;
-//     std::vector<struct link *> child_link;
-// } Link;
-
-// typedef struct joint
-// {
-//     std::string parent_name = "";
-//     std::string child_name = "";
-//     std::string joint_type = "fixed";
-//     scene::Coordinate origin;
-//     scene::Limit limit;
-//     scene::Coordinate axis;
-// } Joint;
 
 /**
 @brief Loaded asset and resource manager.
@@ -219,11 +192,13 @@ class ResourceManager {
                 scene::SceneNode* parent,
                 DrawableGroup* drawables);
 
-  void loadURDFMesh(Link *node, scene::SceneNode* parent, Magnum::SceneGraph::DrawableGroup3D* drawables);
+  void loadURDFMesh(Link* node,
+                    scene::SceneNode* parent,
+                    Magnum::SceneGraph::DrawableGroup3D* drawables);
 
   bool loadURDFMeshData(const AssetInfo& info,
-                           scene::SceneNode* child = nullptr,
-                           DrawableGroup* drawables = nullptr);
+                        scene::SceneNode* child = nullptr,
+                        DrawableGroup* drawables = nullptr);
 
   // load the mesh data
   // If parent, also do scene graph
@@ -330,7 +305,7 @@ class ResourceManager {
 
   bool compressTextures_ = false;
 
-//   std::vector<Link *> link_vec;
+  //   std::vector<Link *> link_vec;
 };
 
 }  // namespace assets
