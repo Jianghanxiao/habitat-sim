@@ -83,8 +83,7 @@ bool ResourceManager::loadScene(const AssetInfo& info,
         meshSuccess = loadGeneralMeshData(info, parent, drawables);
       } else if (info.type == AssetType::URDF) {
         meshSuccess = loadURDF(info, parent, drawables);
-      } 
-      else {
+      } else {
         // Unknown type, just load general mesh data
         meshSuccess = loadGeneralMeshData(info, parent, drawables);
       }
@@ -786,47 +785,45 @@ bool ResourceManager::loadInstanceMeshData(const AssetInfo& info,
 
 // import one URDF and constrcut the tree structure
 bool ResourceManager::loadURDF(const AssetInfo& info,
-                                           scene::SceneNode* parent,
-                                           DrawableGroup* drawables) {
+                               scene::SceneNode* parent,
+                               DrawableGroup* drawables) {
   URDFParser parser(info.filepath);
   parser.parse();
   Link* root = parser.getRoot();
 
-  loadURDFMesh(root, parent, drawables);
+  scene::ArticulatedPartSceneNode* new_parent =
+      new scene::ArticulatedPartSceneNode(*parent);
+
+  loadURDFMesh(root, new_parent, drawables);
 
   return true;
 }
 
-void ResourceManager::loadURDFMesh(Link *node, scene::SceneNode* parent, Magnum::SceneGraph::DrawableGroup3D* drawables)
-{
-  // std::cout << "!!!!\n";
-  // std::cout << node->link_name << "\n";
-  // if(node->parent_link != NULL)
-  //   std::cout << node->parent_link->link_name << "\n";
-  // std::cout << node->mesh_name << "\n";
+void ResourceManager::loadURDFMesh(
+    Link* node,
+    scene::SceneNode* parent,
+    Magnum::SceneGraph::DrawableGroup3D* drawables) {
   const std::string& file = node->mesh_name;
 
-  scene::SceneNode* child = &parent->createChild();
+  scene::SceneNode* child = &parent->createArticulatedChild();
   child->setLinkName(node->link_name);
   child->setJointType(node->joint_type);
   child->setJointOrigin(node->joint_origin);
   child->setJointLimit(node->joint_limit);
   child->setJointAxis(node->joint_axis);
 
-  if(file != "") {
+  if (file != "") {
     const assets::AssetInfo info = assets::AssetInfo::fromPath(file);
 
     if (!loadURDFMeshData(info, child, drawables)) {
-       LOG(ERROR) << "cannot load " << file;
-       std::exit(1);
+      LOG(ERROR) << "cannot load " << file;
+      std::exit(1);
     }
   }
-  
-  //std::cout << node->child_link.size() << "\n";
-  for(int i=0; i<=int(node->child_link.size())-1; ++i) {
+
+  for (int i = 0; i <= int(node->child_link.size()) - 1; ++i) {
     loadURDFMesh(node->child_link[i], child, drawables);
   }
-  
 }
 
 bool ResourceManager::loadURDFMeshData(

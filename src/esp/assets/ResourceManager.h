@@ -26,7 +26,7 @@
 #include "MeshData.h"
 #include "MeshMetaData.h"
 #include "esp/physics/PhysicsManager.h"
-#include "esp/scene/SceneNode.h"
+#include "esp/scene/ArticulatedPartSceneNode.h"
 #include "URDFParser.h"
 
 // forward declarations

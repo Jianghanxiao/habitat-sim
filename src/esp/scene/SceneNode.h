@@ -17,18 +17,16 @@ namespace esp {
 namespace scene {
 
 // Struct for URDF
-typedef struct coordinate
-{
-    double x = 0;
-    double y = 0;
-    double z = 0;
+typedef struct coordinate {
+  double x = 0;
+  double y = 0;
+  double z = 0;
 } Coordinate;
 
-typedef struct limit
-{
-    bool has_limit = false;
-    double lower;
-    double upper;
+typedef struct limit {
+  bool has_limit = false;
+  double lower;
+  double upper;
 } Limit;
 
 class SceneGraph;
@@ -66,6 +64,11 @@ class SceneNode : public MagnumObject {
   //! NOTE: child node inherits parent id by default
   SceneNode& createChild();
 
+  //! Create ArticulatedPartSceneNode
+  virtual SceneNode& createArticulatedChild() {
+    return *(new SceneNode(*this));
+  };
+
   //! Returns node id
   virtual int getId() const { return id_; }
 
@@ -91,23 +94,23 @@ class SceneNode : public MagnumObject {
   void setMeshBB(Magnum::Range3D meshBB) { meshBB_ = meshBB; };
 
   //! Articulation information for URDF
-  void setLinkName(std::string link_name) { link_name_ = link_name; };
-  std::string getLinkName() { return link_name_; };
+  virtual void setLinkName(std::string link_name){};
+  virtual std::string getLinkName() { return ""; };
 
-  void setJointType(std::string joint_type) { joint_type_ = joint_type; };
-  std::string getJointType() { return joint_type_; };
+  virtual void setJointType(std::string joint_type){};
+  virtual std::string getJointType() { return "fixed"; };
 
-  void setJointOrigin(Coordinate joint_origin) { joint_origin_ = joint_origin; };
-  Coordinate getJointOrigin() { return joint_origin_; };
+  virtual void setJointOrigin(Coordinate joint_origin){};
+  virtual Coordinate getJointOrigin() { return *(new Coordinate); };
 
-  void setJointLimit(Limit joint_limit) { joint_limit_ = joint_limit; };
-  Limit getJointLimit() { return joint_limit_; };
+  virtual void setJointLimit(Limit joint_limit){};
+  virtual Limit getJointLimit() { return *(new Limit); };
 
-  void setJointAxis(Coordinate joint_axis) { joint_axis_ = joint_axis; };
-  Coordinate getJointAxis() { return joint_axis_; };
+  virtual void setJointAxis(Coordinate joint_axis){};
+  virtual Coordinate getJointAxis() { return *(new Coordinate); };
 
-  void setCurrentValue(double current_value) { current_value_ = current_value; };
-  double getCurrentValue() { return current_value_; };
+  virtual void setCurrentValue(double current_value){};
+  virtual double getCurrentValue() { return 0; };
 
  protected:
   // DO not make the following constructor public!
@@ -125,16 +128,6 @@ class SceneNode : public MagnumObject {
   //! the cumulative bounding box of the full scene graph tree for which this
   //! node is the root
   Magnum::Range3D cumulativeBB_;
-
-  // Articulations information for URDF interaction
-  std::string link_name_ = "";
-  std::string joint_type_ = "fixed";
-  
-  Coordinate joint_origin_; // Relative to the link itself
-  Limit joint_limit_;
-  Coordinate joint_axis_;
-
-  double current_value_ = 0;
 };
 
 }  // namespace scene

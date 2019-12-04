@@ -17,6 +17,8 @@ add_library(scene STATIC
   SuncgObjectCategoryMap.h
   SuncgSemanticScene.cpp
   SuncgSemanticScene.h
+  ArticulatedPartSceneNode.h
+  ArticulatedPartSceneNode.cpp
 )
 
 target_link_libraries(scene
