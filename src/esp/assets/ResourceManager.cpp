@@ -909,8 +909,8 @@ bool ResourceManager::loadURDFMeshData(
     const quatf transform = info.frame.rotationFrameToWorld();
     Magnum::Matrix4 R = Magnum::Matrix4::from(
         Magnum::Quaternion(transform).toMatrix(), Magnum::Vector3());
-    resourceDict_[filename].root.T_parent_local =
-        R * resourceDict_[filename].root.T_parent_local;
+    resourceDict_[filename].root.transformFromLocalToParent =
+        R * resourceDict_[filename].root.transformFromLocalToParent;
   } else {
     metaData = resourceDict_[filename];
   }
