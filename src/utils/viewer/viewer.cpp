@@ -252,8 +252,7 @@ void Viewer::addObject(std::string configFile) {
   Vector3 new_pos = T.transformPoint({0.1f, 2.5f, -2.0f});
 
   auto& drawables = sceneGraph_->getDrawables();
-  assets::PhysicsObjectAttributes poa =
-      resourceManager_.getPhysicsObjectAttributes(configFile);
+
   int physObjectID = physicsManager_->addObject(configFile, &drawables);
   physicsManager_->setTranslation(physObjectID, new_pos);
 
@@ -269,11 +268,8 @@ void Viewer::addObject(std::string configFile) {
   physicsManager_->setRotation(
       physObjectID,
       Magnum::Quaternion(qAxis, sqrt(1 - u1) * sin(2 * M_PI * u2)));
-  objectIDs_.push_back(physObjectID);
 
-  // const Magnum::Vector3& trans =
-  // physicsManager_->getTranslation(physObjectID); LOG(INFO) << "translation: "
-  // << trans[0] << ", " << trans[1] << ", " << trans[2];
+  objectIDs_.push_back(physObjectID);
 }
 
 void Viewer::removeLastObject() {
@@ -534,6 +530,7 @@ void Viewer::keyPressEvent(KeyEvent& event) {
         if (numObjects) {
           int randObjectID = rand() % numObjects;
           addObject(resourceManager_.getObjectConfig(randObjectID));
+
         } else
           LOG(WARNING) << "No objects loaded, can't add any";
       } else
