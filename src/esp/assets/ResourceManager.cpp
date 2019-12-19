@@ -865,7 +865,13 @@ bool ResourceManager::loadURDFMeshData(
   // Mesh & metaData container
   MeshMetaData metaData;
 
+#ifndef MAGNUM_BUILD_STATIC
   Magnum::PluginManager::Manager<Importer> manager;
+#else
+  // avoid using plugins that might depend on different library versions
+  Magnum::PluginManager::Manager<Importer> manager{"nonexistent"};
+#endif
+
   std::unique_ptr<Importer> importer =
       manager.loadAndInstantiate("AnySceneImporter");
   manager.setPreferredPlugins("GltfImporter", {"TinyGltfImporter"});
