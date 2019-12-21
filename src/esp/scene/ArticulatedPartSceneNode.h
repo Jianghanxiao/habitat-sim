@@ -33,7 +33,7 @@ class ArticulatedPartSceneNode : public SceneNode {
   void setJointLimit(vec2f joint_limit) {
     joint_limit_ = joint_limit;
   };
-  vec2f getJointLimit() override { return joint_limit_; };
+  vec2f getJointLimit() { return joint_limit_; };
 
   void setJointAxis(vec3f joint_axis) {
     joint_axis_ = joint_axis;
