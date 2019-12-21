@@ -25,20 +25,20 @@ class ArticulatedPartSceneNode : public SceneNode {
   };
   std::string getJointType() override { return joint_type_; };
 
-  void setJointOrigin(Coordinate joint_origin) override {
+  void setJointOrigin(vec3f joint_origin) override {
     joint_origin_ = joint_origin;
   };
-  Coordinate getJointOrigin() { return joint_origin_; };
+  vec3f getJointOrigin() { return joint_origin_; };
 
-  void setJointLimit(Limit joint_limit) override {
+  void setJointLimit(vec2f joint_limit) override {
     joint_limit_ = joint_limit;
   };
-  Limit getJointLimit() override { return joint_limit_; };
+  vec2f getJointLimit() override { return joint_limit_; };
 
-  void setJointAxis(Coordinate joint_axis) override {
+  void setJointAxis(vec3f joint_axis) override {
     joint_axis_ = joint_axis;
   };
-  Coordinate getJointAxis() override { return joint_axis_; };
+  vec3f getJointAxis() override { return joint_axis_; };
 
   void setCurrentValue(double current_value) override {
     current_value_ = current_value;
@@ -50,9 +50,9 @@ class ArticulatedPartSceneNode : public SceneNode {
   std::string link_name_ = "";
   std::string joint_type_ = "fixed";
 
-  Coordinate joint_origin_;  // Relative to the link itself
-  Limit joint_limit_;
-  Coordinate joint_axis_;
+  vec3f joint_origin_ = vec3f(0, 0, 0);  // Relative to the link itself
+  vec2f joint_limit_ = vec2f(-1, -1);
+  vec3f joint_axis_ = vec3f(0, 0, 0);
 
   double current_value_ = 0;
 };
