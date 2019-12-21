@@ -856,7 +856,7 @@ void ResourceManager::loadURDFMesh(
 
 bool ResourceManager::loadURDFMeshData(
     const AssetInfo& info,
-    scene::SceneNode* child /* = nullptr */,
+    scene::ArticulatedPartSceneNode* child /* = nullptr */,
     DrawableGroup* drawables /* = nullptr */) {
   const std::string& filename = info.filepath;
   const bool fileIsLoaded = resourceDict_.count(filename) > 0;

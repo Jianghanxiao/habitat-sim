@@ -222,11 +222,11 @@ class ResourceManager {
                 DrawableGroup* drawables);
 
   void loadURDFMesh(Link* node,
-                    scene::SceneNode* parent,
+                    scene::ArticulatedPartSceneNode* parent,
                     Magnum::SceneGraph::DrawableGroup3D* drawables);
 
   bool loadURDFMeshData(const AssetInfo& info,
-                        scene::SceneNode* child = nullptr,
+                        scene::ArticulatedPartSceneNode* child = nullptr,
                         DrawableGroup* drawables = nullptr);
 
   // load the mesh data
