@@ -14,36 +14,36 @@ class ArticulatedPartSceneNode : public SceneNode {
   ArticulatedPartSceneNode() = delete;
   ArticulatedPartSceneNode(SceneNode& parent) : SceneNode(parent) {}
 
-  SceneNode& createArticulatedChild() override;
+  SceneNode& createArticulatedChild();
 
   //! Articulation information for URDF
-  void setLinkName(std::string link_name) override { link_name_ = link_name; };
-  std::string getLinkName() override { return link_name_; };
+  void setLinkName(std::string link_name) { link_name_ = link_name; };
+  std::string getLinkName() { return link_name_; };
 
-  void setJointType(std::string joint_type) override {
+  void setJointType(std::string joint_type) {
     joint_type_ = joint_type;
   };
-  std::string getJointType() override { return joint_type_; };
+  std::string getJointType() { return joint_type_; };
 
-  void setJointOrigin(vec3f joint_origin) override {
+  void setJointOrigin(vec3f joint_origin) {
     joint_origin_ = joint_origin;
   };
   vec3f getJointOrigin() { return joint_origin_; };
 
-  void setJointLimit(vec2f joint_limit) override {
+  void setJointLimit(vec2f joint_limit) {
     joint_limit_ = joint_limit;
   };
   vec2f getJointLimit() override { return joint_limit_; };
 
-  void setJointAxis(vec3f joint_axis) override {
+  void setJointAxis(vec3f joint_axis) {
     joint_axis_ = joint_axis;
   };
-  vec3f getJointAxis() override { return joint_axis_; };
+  vec3f getJointAxis() { return joint_axis_; };
 
-  void setCurrentValue(double current_value) override {
+  void setCurrentValue(double current_value) {
     current_value_ = current_value;
   };
-  double getCurrentValue() override { return current_value_; };
+  double getCurrentValue() { return current_value_; };
 
  protected:
   // Articulations information for URDF interaction
