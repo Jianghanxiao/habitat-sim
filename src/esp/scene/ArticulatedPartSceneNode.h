@@ -14,7 +14,7 @@ class ArticulatedPartSceneNode : public SceneNode {
   ArticulatedPartSceneNode() = delete;
   ArticulatedPartSceneNode(SceneNode& parent) : SceneNode(parent) {}
 
-  SceneNode& createArticulatedChild();
+  ArticulatedPartSceneNode& createArticulatedChild();
 
   //! Articulation information for URDF
   void setLinkName(std::string link_name) { link_name_ = link_name; };
