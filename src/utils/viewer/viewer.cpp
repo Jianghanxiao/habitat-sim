@@ -218,18 +218,18 @@ Viewer::Viewer(const Arguments& arguments)
   renderCamera_->getMagnumCamera().setAspectRatioPolicy(
       Magnum::SceneGraph::AspectRatioPolicy::Extend);
 
-  // Load navmesh if available
-  if (file.compare(esp::assets::EMPTY_SCENE) != 0) {
-    const std::string navmeshFilename = io::changeExtension(file, ".navmesh");
-    if (io::exists(navmeshFilename) && !args.isSet("recompute-navmesh")) {
-      LOG(INFO) << "Loading navmesh from " << navmeshFilename;
-      pathfinder_->loadNavMesh(navmeshFilename);
-    } else {
-      esp::nav::NavMeshSettings navMeshSettings;
-      navMeshSettings.setDefaults();
-      recomputeNavMesh(file, navMeshSettings);
-    }
-  }
+  // // Load navmesh if available
+  // if (file.compare(esp::assets::EMPTY_SCENE) != 0) {
+  //   const std::string navmeshFilename = io::changeExtension(file, ".navmesh");
+  //   if (io::exists(navmeshFilename) && !args.isSet("recompute-navmesh")) {
+  //     LOG(INFO) << "Loading navmesh from " << navmeshFilename;
+  //     pathfinder_->loadNavMesh(navmeshFilename);
+  //   } else {
+  //     esp::nav::NavMeshSettings navMeshSettings;
+  //     navMeshSettings.setDefaults();
+  //     recomputeNavMesh(file, navMeshSettings);
+  //   }
+  // }
 
   // connect controls to navmesh if loaded
   if (pathfinder_->isLoaded()) {
