@@ -16,19 +16,6 @@
 namespace esp {
 namespace scene {
 
-// Struct for URDF
-// typedef struct coordinate {
-//   double x = 0;
-//   double y = 0;
-//   double z = 0;
-// } Coordinate;
-
-// typedef struct limit {
-//   bool has_limit = false;
-//   double lower;
-//   double upper;
-// } Limit;
-
 class SceneGraph;
 
 // Future types may include e.g., "LIGHT"
@@ -64,11 +51,6 @@ class SceneNode : public MagnumObject {
   //! NOTE: child node inherits parent id by default
   SceneNode& createChild();
 
-  // //! Create ArticulatedPartSceneNode
-  // virtual SceneNode& createArticulatedChild() {
-  //   return *(new SceneNode(*this));
-  // };
-
   //! Returns node id
   virtual int getId() const { return id_; }
 
@@ -93,24 +75,6 @@ class SceneNode : public MagnumObject {
   //! set local bounding box for meshes stored at this node
   void setMeshBB(Magnum::Range3D meshBB) { meshBB_ = meshBB; };
 
-  // //! Articulation information for URDF
-  // virtual void setLinkName(std::string link_name){};
-  // virtual std::string getLinkName() { return ""; };
-
-  // virtual void setJointType(std::string joint_type){};
-  // virtual std::string getJointType() { return "fixed"; };
-
-  // virtual void setJointOrigin(Coordinate joint_origin){};
-  // virtual Coordinate getJointOrigin() { return *(new Coordinate); };
-
-  // virtual void setJointLimit(Limit joint_limit){};
-  // virtual Limit getJointLimit() { return *(new Limit); };
-
-  // virtual void setJointAxis(Coordinate joint_axis){};
-  // virtual Coordinate getJointAxis() { return *(new Coordinate); };
-
-  // virtual void setCurrentValue(double current_value){};
-  // virtual double getCurrentValue() { return 0; };
 
  protected:
   // DO not make the following constructor public!

@@ -793,13 +793,6 @@ void Viewer::nextJoint() {
   }
 }
 
-// void Viewer::interactWithScene()
-// {
-//   auto* child = navSceneNode_;
-//   scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
-//   controls_(*child_node, "turnRight", lookSensitivity);
-// }
-
 }  // namespace
 
 MAGNUM_APPLICATION_MAIN(Viewer)
