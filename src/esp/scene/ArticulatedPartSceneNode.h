@@ -14,45 +14,45 @@ class ArticulatedPartSceneNode : public SceneNode {
   ArticulatedPartSceneNode() = delete;
   ArticulatedPartSceneNode(SceneNode& parent) : SceneNode(parent) {}
 
-  SceneNode& createArticulatedChild() override;
+  ArticulatedPartSceneNode& createArticulatedChild();
 
   //! Articulation information for URDF
-  void setLinkName(std::string link_name) override { link_name_ = link_name; };
-  std::string getLinkName() override { return link_name_; };
+  void setLinkName(std::string link_name) { link_name_ = link_name; };
+  std::string getLinkName() { return link_name_; };
 
-  void setJointType(std::string joint_type) override {
+  void setJointType(std::string joint_type) {
     joint_type_ = joint_type;
   };
-  std::string getJointType() override { return joint_type_; };
+  std::string getJointType() { return joint_type_; };
 
-  void setJointOrigin(Coordinate joint_origin) override {
+  void setJointOrigin(vec3f joint_origin) {
     joint_origin_ = joint_origin;
   };
-  Coordinate getJointOrigin() { return joint_origin_; };
+  vec3f getJointOrigin() { return joint_origin_; };
 
-  void setJointLimit(Limit joint_limit) override {
+  void setJointLimit(vec2f joint_limit) {
     joint_limit_ = joint_limit;
   };
-  Limit getJointLimit() override { return joint_limit_; };
+  vec2f getJointLimit() { return joint_limit_; };
 
-  void setJointAxis(Coordinate joint_axis) override {
+  void setJointAxis(vec3f joint_axis) {
     joint_axis_ = joint_axis;
   };
-  Coordinate getJointAxis() override { return joint_axis_; };
+  vec3f getJointAxis() { return joint_axis_; };
 
-  void setCurrentValue(double current_value) override {
+  void setCurrentValue(double current_value) {
     current_value_ = current_value;
   };
-  double getCurrentValue() override { return current_value_; };
+  double getCurrentValue() { return current_value_; };
 
  protected:
   // Articulations information for URDF interaction
   std::string link_name_ = "";
   std::string joint_type_ = "fixed";
 
-  Coordinate joint_origin_;  // Relative to the link itself
-  Limit joint_limit_;
-  Coordinate joint_axis_;
+  vec3f joint_origin_ = vec3f(0, 0, 0);  // Relative to the link itself
+  vec2f joint_limit_ = vec2f(-1, -1);
+  vec3f joint_axis_ = vec3f(0, 0, 0);
 
   double current_value_ = 0;
 };

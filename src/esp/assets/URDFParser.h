@@ -34,13 +34,13 @@ namespace assets {
 typedef struct link {
   std::string link_name = "";
   std::string mesh_name = "";
-  scene::Coordinate origin;
+  vec3f origin = vec3f(0, 0, 0);
 
   // Store the articulations information
   std::string joint_type = "fixed";
-  scene::Coordinate joint_origin;  // Relative to the link itself
-  scene::Limit joint_limit;
-  scene::Coordinate joint_axis;
+  vec3f joint_origin = vec3f(0, 0, 0);  // Relative to the link itself
+  vec2f joint_limit = vec2f(-1, -1);
+  vec3f joint_axis = vec3f(0, 0, 0);
 
   // Store the parent and child link
   struct link* parent_link = NULL;
@@ -51,9 +51,9 @@ typedef struct joint {
   std::string parent_name = "";
   std::string child_name = "";
   std::string joint_type = "fixed";
-  scene::Coordinate origin;
-  scene::Limit limit;
-  scene::Coordinate axis;
+  vec3f origin = vec3f(0, 0, 0);
+  vec2f limit = vec2f(-1, -1);
+  vec3f axis = vec3f(0, 0, 0);
 } Joint;
 
 class URDFParser {

@@ -4,9 +4,9 @@
 namespace esp {
 namespace scene {
 
-SceneNode& ArticulatedPartSceneNode::createArticulatedChild() {
+ArticulatedPartSceneNode& ArticulatedPartSceneNode::createArticulatedChild() {
   // will set the parent to *this
-  SceneNode* node = new ArticulatedPartSceneNode(*this);
+  ArticulatedPartSceneNode* node = new ArticulatedPartSceneNode(*this);
   node->setId(this->getId());
   return *node;
 }

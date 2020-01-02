@@ -119,7 +119,7 @@ class Viewer : public Magnum::Platform::Application {
 
   // URDF Variables
   bool enterURDFMode_ = false;
-  std::vector<scene::SceneNode*> joints_;
+  std::vector<scene::ArticulatedPartSceneNode*> joints_;
   int current_joint_ = 0;
 };
 
@@ -556,145 +556,184 @@ void Viewer::keyPressEvent(KeyEvent& event) {
       // Test key. Put what you want here...
       break;
     case KeyEvent::Key::E:
-      if(enterURDFMode_ == false)
-      {
-        LOG(INFO) << "Enter URDF Interaction Mode; Use J to turn into next joint, N and M to control the joint";
+      if (enterURDFMode_ == false) {
+        LOG(INFO) << "Enter URDF Interaction Mode; Use J to turn into next "
+                     "joint, N and M to control the joint";
         getJointNodes();
         if (joints_.size() != 0) {
-          LOG(INFO) << "There are " << joints_.size() << " joints for this model";
+          LOG(INFO) << "There are " << joints_.size()
+                    << " joints for this model";
           enterURDFMode_ = true;
           current_joint_ = 0;
-          LOG(INFO) << "Current Joint: " << joints_[current_joint_]->getLinkName();
+          LOG(INFO) << "Current Joint: "
+                    << joints_[current_joint_]->getLinkName();
+        } else {
+          LOG(WARNING) << "No available joints. Failed in entering URDF "
+                          "Interaction Mode";
         }
-        else {
-           LOG(WARNING) << "No available joints. Failed in entering URDF Interaction Mode";
-        }
-      }
-      else
-      {
+      } else {
         LOG(INFO) << "Exit URDF Interaction Mode";
         enterURDFMode_ = false;
       }
       break;
     case KeyEvent::Key::J: {
-      if(enterURDFMode_ == true) { 
+      if (enterURDFMode_ == true) {
         nextJoint();
-        LOG(INFO) << "Current Joint: " << joints_[current_joint_]->getLinkName();
-      }
-      else {
+        LOG(INFO) << "Current Joint: "
+                  << joints_[current_joint_]->getLinkName();
+      } else {
         LOG(INFO) << "Please Enter URDF Interaction Mode Firstly (Using E)";
       }
     } break;
     case KeyEvent::Key::N: {
-      if(enterURDFMode_ == true) { 
-        scene::SceneNode* currentJoint = joints_[current_joint_];
+      if (enterURDFMode_ == true) {
+        scene::ArticulatedPartSceneNode* currentJoint = joints_[current_joint_];
         if (currentJoint->getJointType() == "prismatic") {
-          scene::Coordinate joint_axis = currentJoint->getJointAxis();
-          scene::Limit joint_limit = currentJoint->getJointLimit();
+          vec3f joint_axis = currentJoint->getJointAxis();
+          vec2f joint_limit = currentJoint->getJointLimit();
           double current_value = currentJoint->getCurrentValue();
+          bool limited = false;
 
           float moveUnit = moveSensitivity;
-          if(joint_limit.has_limit == true) {
-            moveUnit = std::max(std::abs(joint_limit.lower), std::abs(joint_limit.upper)) / 10;
+          if (joint_limit[0] != -1 && joint_limit[1] != -1) {
+            limited = true;
+            moveUnit =
+                std::max(std::abs(joint_limit[0]), std::abs(joint_limit[1])) /
+                10;
           }
-          
-          if(current_value + moveUnit <= joint_limit.upper) {
+
+          if (current_value + moveUnit <= joint_limit[1] || limited == false) {
             auto& object = *currentJoint;
-            object.translateLocal(((joint_axis.x * object.transformation().right()) + (joint_axis.y * object.transformation().up()) + (joint_axis.z * object.transformation().backward())) * moveUnit);
+            object.translateLocal(
+                ((joint_axis[0] * object.transformation().right()) +
+                 (joint_axis[1] * object.transformation().up()) +
+                 (joint_axis[2] * object.transformation().backward())) *
+                moveUnit);
             currentJoint->setCurrentValue(current_value + moveUnit);
-          }
-          else {
+          } else {
             LOG(WARNING) << "Has reached max range";
           }
-        } else if(currentJoint->getJointType() == "revolute") {
-          scene::Coordinate joint_origin = currentJoint->getJointOrigin();
-          scene::Coordinate joint_axis = currentJoint->getJointAxis();
-          scene::Limit joint_limit = currentJoint->getJointLimit();
+        } else if (currentJoint->getJointType() == "revolute") {
+          vec3f joint_origin = currentJoint->getJointOrigin();
+          vec3f joint_axis = currentJoint->getJointAxis();
+          vec2f joint_limit = currentJoint->getJointLimit();
           double current_value = currentJoint->getCurrentValue();
+          bool limited = false;
 
-          //This is in radius
+          // This is in radius
           float rotateUnit = lookSensitivity;
-          if(joint_limit.has_limit == true) {
-            rotateUnit = std::max(std::abs(joint_limit.lower), std::abs(joint_limit.upper)) / 20;
+          if (joint_limit[0] != -1 && joint_limit[1] != -1) {
+            limited = true;
+            rotateUnit =
+                std::max(std::abs(joint_limit[0]), std::abs(joint_limit[1])) /
+                20;
           }
 
-          if(current_value + rotateUnit <= joint_limit.upper) {
+          if (current_value + rotateUnit <= joint_limit[1] ||
+              limited == false) {
             auto& object = *currentJoint;
-            object.translateLocal((-joint_origin.x * object.transformation().right()) + (-joint_origin.y * object.transformation().up()) + (-joint_origin.z * object.transformation().backward()));
-            
-            object.rotate(Magnum::Rad(rotateUnit), Magnum::Vector3(joint_axis.x, joint_axis.y, joint_axis.z));
-            //LOG(INFO) << joint_origin.x << " " << joint_origin.y << " " << joint_origin.z;
+            object.translateLocal(
+                (-joint_origin[0] * object.transformation().right()) +
+                (-joint_origin[1] * object.transformation().up()) +
+                (-joint_origin[2] * object.transformation().backward()));
 
-            object.translateLocal((joint_origin.x * object.transformation().right()) + (joint_origin.y * object.transformation().up()) + (joint_origin.z * object.transformation().backward()));
+            object.rotate(
+                Magnum::Rad(rotateUnit),
+                Magnum::Vector3(joint_axis[0], joint_axis[1], joint_axis[2]));
+            // LOG(INFO) << joint_origin.x << " " << joint_origin.y << " " <<
+            // joint_origin.z;
+
+            object.translateLocal(
+                (joint_origin[0] * object.transformation().right()) +
+                (joint_origin[1] * object.transformation().up()) +
+                (joint_origin[2] * object.transformation().backward()));
             currentJoint->setCurrentValue(current_value + rotateUnit);
-          }
-          else {
+          } else {
             LOG(WARNING) << "Has reached max range";
           }
         }
-      }
-      else {
+      } else {
         LOG(INFO) << "Please Enter URDF Interaction Mode Firstly (Using E)";
       }
     } break;
     case KeyEvent::Key::M: {
-      if(enterURDFMode_ == true) { 
-        scene::SceneNode* currentJoint = joints_[current_joint_];
+      if (enterURDFMode_ == true) {
+        scene::ArticulatedPartSceneNode* currentJoint = joints_[current_joint_];
         if (currentJoint->getJointType() == "prismatic") {
-          scene::Coordinate joint_axis = currentJoint->getJointAxis();
-          scene::Limit joint_limit = currentJoint->getJointLimit();
+          vec3f joint_axis = currentJoint->getJointAxis();
+          vec2f joint_limit = currentJoint->getJointLimit();
           double current_value = currentJoint->getCurrentValue();
+          bool limited = false;
 
           float moveUnit = moveSensitivity;
-          if(joint_limit.has_limit == true) {
-            moveUnit = std::max(std::abs(joint_limit.lower), std::abs(joint_limit.upper)) / 10;
+          if (joint_limit[0] != -1 && joint_limit[1] != -1) {
+            limited = true;
+            moveUnit =
+                std::max(std::abs(joint_limit[0]), std::abs(joint_limit[1])) /
+                10;
           }
-          
-          if(current_value - moveUnit >= joint_limit.lower) {
+
+          if (current_value - moveUnit >= joint_limit[0] || limited == false) {
             auto& object = *currentJoint;
-            object.translateLocal(((joint_axis.x * object.transformation().right()) + (joint_axis.y * object.transformation().up()) + (joint_axis.z * object.transformation().backward())) * (-moveUnit));
+            object.translateLocal(
+                ((joint_axis[0] * object.transformation().right()) +
+                 (joint_axis[1] * object.transformation().up()) +
+                 (joint_axis[2] * object.transformation().backward())) *
+                (-moveUnit));
             currentJoint->setCurrentValue(current_value - moveUnit);
-          }
-          else {
+          } else {
             LOG(WARNING) << "Has reached min range";
           }
-        } else if(currentJoint->getJointType() == "revolute") {
-          scene::Coordinate joint_origin = currentJoint->getJointOrigin();
-          scene::Coordinate joint_axis = currentJoint->getJointAxis();
-          scene::Limit joint_limit = currentJoint->getJointLimit();
+        } else if (currentJoint->getJointType() == "revolute") {
+          vec3f joint_origin = currentJoint->getJointOrigin();
+          vec3f joint_axis = currentJoint->getJointAxis();
+          vec2f joint_limit = currentJoint->getJointLimit();
           double current_value = currentJoint->getCurrentValue();
+          bool limited = false;
 
-          //This is in radius
+          // This is in radius
           float rotateUnit = lookSensitivity;
-          if(joint_limit.has_limit == true) {
-            rotateUnit = std::max(std::abs(joint_limit.lower), std::abs(joint_limit.upper)) / 20;
+          if (joint_limit[0] != -1 && joint_limit[1] != -1) {
+            limited = true;
+            rotateUnit =
+                std::max(std::abs(joint_limit[0]), std::abs(joint_limit[1])) /
+                20;
           }
 
-          if(current_value - rotateUnit >= joint_limit.lower) {
+          if (current_value - rotateUnit >= joint_limit[0] ||
+              limited == false) {
             auto& object = *currentJoint;
-            object.translateLocal((-joint_origin.x * object.transformation().right()) + (-joint_origin.y * object.transformation().up()) + (-joint_origin.z * object.transformation().backward()));
-            
-            object.rotateLocal(Magnum::Rad(-rotateUnit), Magnum::Vector3(joint_axis.x, joint_axis.y, joint_axis.z));
+            object.translateLocal(
+                (-joint_origin[0] * object.transformation().right()) +
+                (-joint_origin[1] * object.transformation().up()) +
+                (-joint_origin[2] * object.transformation().backward()));
 
-            object.translateLocal((joint_origin.x * object.transformation().right()) + (joint_origin.y * object.transformation().up()) + (joint_origin.z * object.transformation().backward()));
+            object.rotateLocal(
+                Magnum::Rad(-rotateUnit),
+                Magnum::Vector3(joint_axis[0], joint_axis[1], joint_axis[2]));
+
+            object.translateLocal(
+                (joint_origin[0] * object.transformation().right()) +
+                (joint_origin[1] * object.transformation().up()) +
+                (joint_origin[2] * object.transformation().backward()));
             currentJoint->setCurrentValue(current_value - rotateUnit);
-          }
-          else {
+          } else {
             LOG(WARNING) << "Has reached min range";
           }
         }
-      }
-      else {
+      } else {
         LOG(INFO) << "Please Enter URDF Interaction Mode Firstly (Using E)";
       }
     } break;
     // case KeyEvent::Key::Y: {
     //   // Test key. Put what you want here...
-    //   auto* child = navSceneNode_->children().first()->children().first()->children().first();
+    //   auto* child =
+    //   navSceneNode_->children().first()->children().first()->children().first();
     //   while(child != NULL)
     //   {
-    //     scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
-    //     if(child_node->getLinkName() != "")
+    //     scene::SceneNode* child_node =
+    //     dynamic_cast<scene::SceneNode*>(child); if(child_node->getLinkName()
+    //     != "")
     //       break;
     //     LOG(INFO) << child_node->getLinkName();
     //     child = child->nextSibling();
@@ -728,27 +767,28 @@ void Viewer::getJointNodes() {
   std::vector<scene::SceneNode*> nodeList;
   nodeList.push_back(navSceneNode_);
   int head_ptr = 0;
-  while (head_ptr < nodeList.size())
-  {
+  while (head_ptr < nodeList.size()) {
     scene::SceneNode* currentSceneNode = nodeList[head_ptr];
     auto* child = currentSceneNode->children().first();
     while (child != nullptr) {
       scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
       if (child_node != nullptr) {
         nodeList.push_back(child_node);
-        if (child_node->getJointType() != "fixed") {
-          joints_.push_back(child_node);
+        scene::ArticulatedPartSceneNode* joint_node =
+            dynamic_cast<scene::ArticulatedPartSceneNode*>(child_node);
+        if (joint_node != NULL && joint_node->getJointType() != "fixed") {
+          joints_.push_back(joint_node);
         }
       }
       child = child->nextSibling();
     }
-    head_ptr ++;
+    head_ptr++;
   }
 }
 
 void Viewer::nextJoint() {
   current_joint_ += 1;
-  if(current_joint_ == joints_.size()) {
+  if (current_joint_ == joints_.size()) {
     current_joint_ -= joints_.size();
   }
 }
@@ -759,10 +799,6 @@ void Viewer::nextJoint() {
 //   scene::SceneNode* child_node = dynamic_cast<scene::SceneNode*>(child);
 //   controls_(*child_node, "turnRight", lookSensitivity);
 // }
-
-
-
-
 
 }  // namespace
 

@@ -829,11 +829,11 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
 
 void ResourceManager::loadURDFMesh(
     Link* node,
-    scene::SceneNode* parent,
+    scene::ArticulatedPartSceneNode* parent,
     Magnum::SceneGraph::DrawableGroup3D* drawables) {
   const std::string& file = node->mesh_name;
 
-  scene::SceneNode* child = &parent->createArticulatedChild();
+  scene::ArticulatedPartSceneNode* child = &parent->createArticulatedChild();
   child->setLinkName(node->link_name);
   child->setJointType(node->joint_type);
   child->setJointOrigin(node->joint_origin);
@@ -856,7 +856,7 @@ void ResourceManager::loadURDFMesh(
 
 bool ResourceManager::loadURDFMeshData(
     const AssetInfo& info,
-    scene::SceneNode* child /* = nullptr */,
+    scene::ArticulatedPartSceneNode* child /* = nullptr */,
     DrawableGroup* drawables /* = nullptr */) {
   const std::string& filename = info.filepath;
   const bool fileIsLoaded = resourceDict_.count(filename) > 0;

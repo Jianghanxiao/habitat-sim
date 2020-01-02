@@ -137,16 +137,16 @@ bool URDFParser::parse() {
 
         // Judge whether the origin is defined in the joint
         if (is_joint == true) {
-          joint_vec[joint_vec.size() - 1]->origin.x = origin_x;
-          joint_vec[joint_vec.size() - 1]->origin.y = origin_y;
-          joint_vec[joint_vec.size() - 1]->origin.z = origin_z;
+          joint_vec[joint_vec.size() - 1]->origin[0] = origin_x;
+          joint_vec[joint_vec.size() - 1]->origin[1] = origin_y;
+          joint_vec[joint_vec.size() - 1]->origin[2] = origin_z;
         }
         // Judge whether the origin is defined in the link and in the visual
         // part
         else if (is_link == true && is_visual == true) {
-          link_vec[link_vec.size() - 1]->origin.x = origin_x;
-          link_vec[link_vec.size() - 1]->origin.y = origin_y;
-          link_vec[link_vec.size() - 1]->origin.z = origin_z;
+          link_vec[link_vec.size() - 1]->origin[0] = origin_x;
+          link_vec[link_vec.size() - 1]->origin[1] = origin_y;
+          link_vec[link_vec.size() - 1]->origin[2] = origin_z;
         }
       }
 
@@ -163,9 +163,9 @@ bool URDFParser::parse() {
         std::string upper =
             line.substr(upper_index1 + 1, upper_index2 - upper_index1 - 1);
 
-        joint_vec[joint_vec.size() - 1]->limit.has_limit = true;
-        joint_vec[joint_vec.size() - 1]->limit.lower = std::stod(lower);
-        joint_vec[joint_vec.size() - 1]->limit.upper = std::stod(upper);
+        // joint_vec[joint_vec.size() - 1]->limit.has_limit = true;
+        joint_vec[joint_vec.size() - 1]->limit[0] = std::stod(lower);
+        joint_vec[joint_vec.size() - 1]->limit[1] = std::stod(upper);
       }
 
       // Parse the axis for joint
@@ -182,9 +182,9 @@ bool URDFParser::parse() {
         double axis_y = std::stod(axis.substr(s1), &s2);
         double axis_z = std::stod((axis.substr(s1)).substr(s2));
 
-        joint_vec[joint_vec.size() - 1]->axis.x = axis_x;
-        joint_vec[joint_vec.size() - 1]->axis.y = axis_y;
-        joint_vec[joint_vec.size() - 1]->axis.z = axis_z;
+        joint_vec[joint_vec.size() - 1]->axis[0] = axis_x;
+        joint_vec[joint_vec.size() - 1]->axis[1] = axis_y;
+        joint_vec[joint_vec.size() - 1]->axis[2] = axis_z;
       }
     }
   }
@@ -203,9 +203,10 @@ bool URDFParser::parse() {
     children->joint_axis = joint_vec[i]->axis;
     // Convert the coordinate from the parent link frame to the children link
     // frame
-    children->joint_origin.x = children->origin.x;
-    children->joint_origin.y = children->origin.y;
-    children->joint_origin.z = children->origin.z;
+    children->joint_origin = children->origin;
+    // children->joint_origin.x = children->origin.x;
+    // children->joint_origin.y = children->origin.y;
+    // children->joint_origin.z = children->origin.z;
 
     // Update the hierarchy tree
     children->parent_link = parent;
