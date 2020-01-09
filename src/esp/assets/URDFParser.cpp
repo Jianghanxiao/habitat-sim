@@ -7,8 +7,6 @@ namespace assets {
 URDFParser::URDFParser(const std::string& filename) {
   filename_ = filename;
   root_ = NULL;
-  std::vector<Link*>().swap(link_vec_);
-  std::vector<Joint*>().swap(joint_vec_);
 }
 
 URDFParser::~URDFParser() {
@@ -21,6 +19,10 @@ URDFParser::~URDFParser() {
 void URDFParser::set(const std::string& filename) {
   filename_ = filename;
   root_ = NULL;
+  for (int i = 0; i <= link_vec_.size() - 1; ++i) 
+    delete(link_vec_[i]);
+  for (int i = 0; i <= joint_vec_.size() - 1; ++i) 
+    delete(joint_vec_[i]);
   std::vector<Link*>().swap(link_vec_);
   std::vector<Joint*>().swap(joint_vec_);
 }
