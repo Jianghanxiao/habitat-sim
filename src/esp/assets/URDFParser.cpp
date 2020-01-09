@@ -7,11 +7,22 @@ namespace assets {
 URDFParser::URDFParser(const std::string& filename) {
   filename_ = filename;
   root_ = NULL;
+  std::vector<Link*>().swap(link_vec_);
+  std::vector<Joint*>().swap(joint_vec_);
+}
+
+URDFParser::~URDFParser() {
+  for (int i = 0; i <= link_vec_.size() - 1; ++i) 
+    delete(link_vec_[i]);
+  for (int i = 0; i <= joint_vec_.size() - 1; ++i) 
+    delete(joint_vec_[i]);
 }
 
 void URDFParser::set(const std::string& filename) {
   filename_ = filename;
   root_ = NULL;
+  std::vector<Link*>().swap(link_vec_);
+  std::vector<Joint*>().swap(joint_vec_);
 }
 
 // Parse the URDF
@@ -32,8 +43,6 @@ bool URDFParser::parse() {
   int index = -1;
   bool is_link = false, is_visual = false;
   bool is_joint = false;
-  std::vector<Link*> link_vec;
-  std::vector<Joint*> joint_vec;
   std::map<std::string, Link*> name_link_map;
 
   while (std::getline(std::cin, line)) {
@@ -45,11 +54,11 @@ bool URDFParser::parse() {
         is_link = true;
         int name_index1 = line.find("\"");
         int name_index2 = line.find("\"", name_index1 + 1);
-        link_vec.push_back(new Link);
-        link_vec[link_vec.size() - 1]->link_name =
+        link_vec_.push_back(new Link);
+        link_vec_[link_vec_.size() - 1]->link_name =
             line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
-        name_link_map[link_vec[link_vec.size() - 1]->link_name] =
-            link_vec[link_vec.size() - 1];
+        name_link_map[link_vec_[link_vec_.size() - 1]->link_name] =
+            link_vec_[link_vec_.size() - 1];
       }
 
       // Judge whther this line is the visual attribute
@@ -68,10 +77,11 @@ bool URDFParser::parse() {
       if (index != -1 && is_link == true && is_visual == true) {
         int name_index1 = line.find("\"");
         int name_index2 = line.find("\"", name_index1 + 1);
-        link_vec[link_vec.size() - 1]->mesh_name =
+        link_vec_[link_vec_.size() - 1]->mesh_name =
             line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
-        // std::cout << name_link_map[link_vec[link_vec.size() - 1]->link_name]
-        // << "; " << link_vec[link_vec.size() - 1] << "\n";
+        // std::cout << name_link_map[link_vec_[link_vec_.size() -
+        // 1]->link_name]
+        // << "; " << link_vec_[link_vec_.size() - 1] << "\n";
       }
 
       index = line.find("/link>");
@@ -83,7 +93,7 @@ bool URDFParser::parse() {
       index = line.find("<joint");
       if (index != -1) {
         is_joint = true;
-        joint_vec.push_back(new Joint);
+        joint_vec_.push_back(new Joint);
       }
 
       // Get the joint type
@@ -95,7 +105,7 @@ bool URDFParser::parse() {
         // Index 3 and 4 for joint type
         int name_index3 = line.find("\"", name_index2 + 1);
         int name_index4 = line.find("\"", name_index3 + 1);
-        joint_vec[joint_vec.size() - 1]->joint_type =
+        joint_vec_[joint_vec_.size() - 1]->joint_type =
             line.substr(name_index3 + 1, name_index4 - name_index3 - 1);
       }
 
@@ -104,7 +114,7 @@ bool URDFParser::parse() {
       if (index != -1 && is_joint == true) {
         int name_index1 = line.find("\"");
         int name_index2 = line.find("\"", name_index1 + 1);
-        joint_vec[joint_vec.size() - 1]->parent_name =
+        joint_vec_[joint_vec_.size() - 1]->parent_name =
             line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
       }
       // Get the child name
@@ -112,7 +122,7 @@ bool URDFParser::parse() {
       if (index != -1 && is_joint == true) {
         int name_index1 = line.find("\"");
         int name_index2 = line.find("\"", name_index1 + 1);
-        joint_vec[joint_vec.size() - 1]->child_name =
+        joint_vec_[joint_vec_.size() - 1]->child_name =
             line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
       }
 
@@ -137,16 +147,16 @@ bool URDFParser::parse() {
 
         // Judge whether the origin is defined in the joint
         if (is_joint == true) {
-          joint_vec[joint_vec.size() - 1]->origin[0] = origin_x;
-          joint_vec[joint_vec.size() - 1]->origin[1] = origin_y;
-          joint_vec[joint_vec.size() - 1]->origin[2] = origin_z;
+          joint_vec_[joint_vec_.size() - 1]->origin[0] = origin_x;
+          joint_vec_[joint_vec_.size() - 1]->origin[1] = origin_y;
+          joint_vec_[joint_vec_.size() - 1]->origin[2] = origin_z;
         }
         // Judge whether the origin is defined in the link and in the visual
         // part
         else if (is_link == true && is_visual == true) {
-          link_vec[link_vec.size() - 1]->origin[0] = origin_x;
-          link_vec[link_vec.size() - 1]->origin[1] = origin_y;
-          link_vec[link_vec.size() - 1]->origin[2] = origin_z;
+          link_vec_[link_vec_.size() - 1]->origin[0] = origin_x;
+          link_vec_[link_vec_.size() - 1]->origin[1] = origin_y;
+          link_vec_[link_vec_.size() - 1]->origin[2] = origin_z;
         }
       }
 
@@ -163,9 +173,9 @@ bool URDFParser::parse() {
         std::string upper =
             line.substr(upper_index1 + 1, upper_index2 - upper_index1 - 1);
 
-        // joint_vec[joint_vec.size() - 1]->limit.has_limit = true;
-        joint_vec[joint_vec.size() - 1]->limit[0] = std::stod(lower);
-        joint_vec[joint_vec.size() - 1]->limit[1] = std::stod(upper);
+        // joint_vec_[joint_vec_.size() - 1]->limit.has_limit = true;
+        joint_vec_[joint_vec_.size() - 1]->limit[0] = std::stod(lower);
+        joint_vec_[joint_vec_.size() - 1]->limit[1] = std::stod(upper);
       }
 
       // Parse the axis for joint
@@ -182,25 +192,25 @@ bool URDFParser::parse() {
         double axis_y = std::stod(axis.substr(s1), &s2);
         double axis_z = std::stod((axis.substr(s1)).substr(s2));
 
-        joint_vec[joint_vec.size() - 1]->axis[0] = axis_x;
-        joint_vec[joint_vec.size() - 1]->axis[1] = axis_y;
-        joint_vec[joint_vec.size() - 1]->axis[2] = axis_z;
+        joint_vec_[joint_vec_.size() - 1]->axis[0] = axis_x;
+        joint_vec_[joint_vec_.size() - 1]->axis[1] = axis_y;
+        joint_vec_[joint_vec_.size() - 1]->axis[2] = axis_z;
       }
     }
   }
 
   // Construct the tree from link and joint
   // The root node should be "0:virtual"
-  for (int i = 0; i <= joint_vec.size() - 1; ++i) {
-    std::string parent_name = joint_vec[i]->parent_name;
-    std::string children_name = joint_vec[i]->child_name;
+  for (int i = 0; i <= joint_vec_.size() - 1; ++i) {
+    std::string parent_name = joint_vec_[i]->parent_name;
+    std::string children_name = joint_vec_[i]->child_name;
     Link* parent = name_link_map[parent_name];
     Link* children = name_link_map[children_name];
 
     // Add the articulation information
-    children->joint_type = joint_vec[i]->joint_type;
-    children->joint_limit = joint_vec[i]->limit;
-    children->joint_axis = joint_vec[i]->axis;
+    children->joint_type = joint_vec_[i]->joint_type;
+    children->joint_limit = joint_vec_[i]->limit;
+    children->joint_axis = joint_vec_[i]->axis;
     // Convert the coordinate from the parent link frame to the children link
     // frame
     children->joint_origin = children->origin;
@@ -217,9 +227,9 @@ bool URDFParser::parse() {
   fclose(stdin);
 
   // Get the root node of the URDF tree
-  for (int i = 0; i <= link_vec.size() - 1; ++i) {
-    if (link_vec[i]->parent_link == NULL) {
-      root_ = link_vec[i];
+  for (int i = 0; i <= link_vec_.size() - 1; ++i) {
+    if (link_vec_[i]->parent_link == NULL) {
+      root_ = link_vec_[i];
       break;
     }
   }

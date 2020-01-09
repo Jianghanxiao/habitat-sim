@@ -364,7 +364,7 @@ class ResourceManager {
 
   bool compressTextures_ = false;
 
-  //   std::vector<Link *> link_vec;
+  //   std::vector<Link *> link_vec_;
 };
 
 }  // namespace assets

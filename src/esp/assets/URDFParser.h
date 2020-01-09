@@ -8,26 +8,8 @@
 #include <vector>
 
 #include "Asset.h"
-#include "Attributes.h"
-#include "BaseMesh.h"
-#include "CollisionMeshData.h"
-#include "GltfMeshData.h"
-#include "MeshData.h"
-#include "MeshMetaData.h"
-#include "esp/physics/PhysicsManager.h"
-#include "esp/scene/SceneNode.h"
 
 namespace esp {
-namespace gfx {
-class Drawable;
-}
-namespace scene {
-struct SceneConfiguration;
-}
-namespace physics {
-class PhysicsManager;
-class RigidObject;
-}  // namespace physics
 
 namespace assets {
 
@@ -60,16 +42,18 @@ class URDFParser {
  public:
   URDFParser() {}
   URDFParser(const std::string& filename);
-  ~URDFParser() {}
+  ~URDFParser();
 
   void set(const std::string& filename);
   bool parse();
 
-  Link* getRoot() { return root_; }
+  const Link& getRoot() const { return *root_; }
 
  protected:
   std::string filename_;
   Link* root_ = NULL;
+  std::vector<Link*> link_vec_;
+  std::vector<Joint*> joint_vec_;
 };
 
 }  // namespace assets

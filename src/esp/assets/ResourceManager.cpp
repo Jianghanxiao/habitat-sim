@@ -817,12 +817,12 @@ bool ResourceManager::loadURDF(const AssetInfo& info,
                                DrawableGroup* drawables) {
   URDFParser parser(info.filepath);
   parser.parse();
-  Link* root = parser.getRoot();
+  Link root = parser.getRoot();
 
   scene::ArticulatedPartSceneNode* new_parent =
       new scene::ArticulatedPartSceneNode(*parent);
 
-  loadURDFMesh(root, new_parent, drawables);
+  loadURDFMesh(&root, new_parent, drawables);
 
   return true;
 }
