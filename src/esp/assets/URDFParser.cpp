@@ -12,8 +12,8 @@ URDFParser::URDFParser(const std::string& filename) {
 void URDFParser::set(const std::string& filename) {
   filename_ = filename;
   root_ = NULL;
-  std::vector<std::unique_ptr<Link>>().swap(link_vec_);
-  std::vector<std::unique_ptr<Joint>>().swap(joint_vec_);
+  link_vec_.clear();
+  joint_vec_.clear();
 }
 
 // Parse the URDF
