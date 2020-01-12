@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -13,7 +14,7 @@ namespace esp {
 
 namespace assets {
 
-typedef struct link {
+struct Link {
   std::string link_name = "";
   std::string mesh_name = "";
   vec3f origin = vec3f(0, 0, 0);
@@ -25,24 +26,24 @@ typedef struct link {
   vec3f joint_axis = vec3f(0, 0, 0);
 
   // Store the parent and child link
-  struct link* parent_link = NULL;
-  std::vector<struct link*> child_link;
-} Link;
+  struct Link* parent_link = NULL;
+  std::vector<struct Link*> child_link;
+};
 
-typedef struct joint {
+struct Joint {
   std::string parent_name = "";
   std::string child_name = "";
   std::string joint_type = "fixed";
   vec3f origin = vec3f(0, 0, 0);
   vec2f limit = vec2f(-1, -1);
   vec3f axis = vec3f(0, 0, 0);
-} Joint;
+};
 
 class URDFParser {
  public:
   URDFParser() {}
   URDFParser(const std::string& filename);
-  ~URDFParser();
+  ~URDFParser() {}
 
   void set(const std::string& filename);
   bool parse();
@@ -52,8 +53,8 @@ class URDFParser {
  protected:
   std::string filename_;
   Link* root_ = NULL;
-  std::vector<Link*> link_vec_;
-  std::vector<Joint*> joint_vec_;
+  std::vector<std::unique_ptr<Link>> link_vec_;
+  std::vector<std::unique_ptr<Joint>> joint_vec_;
 };
 
 }  // namespace assets

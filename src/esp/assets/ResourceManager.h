@@ -28,6 +28,7 @@
 #include "URDFParser.h"
 #include "esp/physics/PhysicsManager.h"
 #include "esp/scene/ArticulatedPartSceneNode.h"
+#include "esp/scene/SceneNode.h"
 
 // forward declarations
 namespace Magnum {
@@ -363,8 +364,6 @@ class ResourceManager {
                       const Magnum::Color4& color = Magnum::Color4{1});
 
   bool compressTextures_ = false;
-
-  //   std::vector<Link *> link_vec_;
 };
 
 }  // namespace assets

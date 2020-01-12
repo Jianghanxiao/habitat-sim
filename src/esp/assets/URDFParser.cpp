@@ -9,22 +9,11 @@ URDFParser::URDFParser(const std::string& filename) {
   root_ = NULL;
 }
 
-URDFParser::~URDFParser() {
-  for (int i = 0; i <= link_vec_.size() - 1; ++i) 
-    delete(link_vec_[i]);
-  for (int i = 0; i <= joint_vec_.size() - 1; ++i) 
-    delete(joint_vec_[i]);
-}
-
 void URDFParser::set(const std::string& filename) {
   filename_ = filename;
   root_ = NULL;
-  for (int i = 0; i <= link_vec_.size() - 1; ++i) 
-    delete(link_vec_[i]);
-  for (int i = 0; i <= joint_vec_.size() - 1; ++i) 
-    delete(joint_vec_[i]);
-  std::vector<Link*>().swap(link_vec_);
-  std::vector<Joint*>().swap(joint_vec_);
+  std::vector<std::unique_ptr<Link>>().swap(link_vec_);
+  std::vector<std::unique_ptr<Joint>>().swap(joint_vec_);
 }
 
 // Parse the URDF
@@ -56,11 +45,11 @@ bool URDFParser::parse() {
         is_link = true;
         int name_index1 = line.find("\"");
         int name_index2 = line.find("\"", name_index1 + 1);
-        link_vec_.push_back(new Link);
+        link_vec_.push_back(std::make_unique<Link>());
         link_vec_[link_vec_.size() - 1]->link_name =
             line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
         name_link_map[link_vec_[link_vec_.size() - 1]->link_name] =
-            link_vec_[link_vec_.size() - 1];
+            link_vec_[link_vec_.size() - 1].get();
       }
 
       // Judge whther this line is the visual attribute
@@ -95,7 +84,7 @@ bool URDFParser::parse() {
       index = line.find("<joint");
       if (index != -1) {
         is_joint = true;
-        joint_vec_.push_back(new Joint);
+        joint_vec_.push_back(std::make_unique<Joint>());
       }
 
       // Get the joint type
@@ -231,7 +220,7 @@ bool URDFParser::parse() {
   // Get the root node of the URDF tree
   for (int i = 0; i <= link_vec_.size() - 1; ++i) {
     if (link_vec_[i]->parent_link == NULL) {
-      root_ = link_vec_[i];
+      root_ = link_vec_[i].get();
       break;
     }
   }
