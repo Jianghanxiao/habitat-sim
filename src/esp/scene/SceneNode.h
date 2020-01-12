@@ -75,7 +75,6 @@ class SceneNode : public MagnumObject {
   //! set local bounding box for meshes stored at this node
   void setMeshBB(Magnum::Range3D meshBB) { meshBB_ = meshBB; };
 
-
  protected:
   // DO not make the following constructor public!
   // it can ONLY be called from SceneGraph class to initialize the scene graph
