@@ -16,7 +16,7 @@ class ArticulatedPartSceneNode : public SceneNode {
 
   ArticulatedPartSceneNode& createArticulatedChild();
 
-  //! Articulation information for URDF
+  // Articulation information for URDF
   void setLinkName(std::string link_name) { link_name_ = link_name; };
   std::string getLinkName() { return link_name_; };
 

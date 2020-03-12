@@ -154,12 +154,15 @@ bool URDFParser::parse() {
       // Parse the limit for joint
       index = line.find("<limit");
       if (index != -1 && is_joint == true) {
-        int lower_index1 = line.find("\"");
+        int temp_index;
+        temp_index = line.find("lower");
+        int lower_index1 = line.find("\"", temp_index + 1);
         int lower_index2 = line.find("\"", lower_index1 + 1);
         std::string lower =
             line.substr(lower_index1 + 1, lower_index2 - lower_index1 - 1);
 
-        int upper_index1 = line.find("\"", lower_index2 + 1);
+        temp_index = line.find("upper");
+        int upper_index1 = line.find("\"", temp_index);
         int upper_index2 = line.find("\"", upper_index1 + 1);
         std::string upper =
             line.substr(upper_index1 + 1, upper_index2 - upper_index1 - 1);
