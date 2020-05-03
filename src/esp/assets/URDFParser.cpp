@@ -30,6 +30,16 @@ bool URDFParser::parse() {
     std::exit(1);
   }
 
+  int base_path_index = -1;
+  for (int i = filename.length() - 1; i >= 0; --i) {
+    if(filename[i] == '/') {
+      base_path_index = i;
+      break;
+    }
+  }
+
+  std::string base_path = filename.substr(0, base_path_index + 1);
+
   std::string line;
   int index = -1;
   bool is_link = false, is_visual = false;
@@ -68,7 +78,7 @@ bool URDFParser::parse() {
       if (index != -1 && is_link == true && is_visual == true) {
         int name_index1 = line.find("\"");
         int name_index2 = line.find("\"", name_index1 + 1);
-        link_vec_[link_vec_.size() - 1]->mesh_name =
+        link_vec_[link_vec_.size() - 1]->mesh_name = base_path + 
             line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
         // std::cout << name_link_map[link_vec_[link_vec_.size() -
         // 1]->link_name]
