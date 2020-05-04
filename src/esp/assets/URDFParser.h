@@ -18,10 +18,12 @@ struct Link {
   std::string link_name = "";
   std::string mesh_name = "";
   vec3f origin = vec3f(0, 0, 0);
+  vec3f rpy = vec3f(0, 0, 0);
 
   // Store the articulations information
   std::string joint_type = "fixed";
   vec3f joint_origin = vec3f(0, 0, 0);  // Relative to the link itself
+  vec3f joint_rpy = vec3f(0, 0, 0);
   vec2f joint_limit = vec2f(-1, -1);
   vec3f joint_axis = vec3f(0, 0, 0);
 
@@ -35,6 +37,7 @@ struct Joint {
   std::string child_name = "";
   std::string joint_type = "fixed";
   vec3f origin = vec3f(0, 0, 0);
+  vec3f rpy = vec3f(0, 0, 0);
   vec2f limit = vec2f(-1, -1);
   vec3f axis = vec3f(0, 0, 0);
 };

@@ -161,6 +161,36 @@ bool URDFParser::parse() {
         }
       }
 
+      // Parse the rpy for link-visual and joint
+      index = line.find("rpy");
+      if(index != -1) {
+        int rpy_index1 = line.find("\"", index + 1);
+        int rpy_index2 = line.find("\"", rpy_index2 + 1);
+        std::string rpy =
+              line.substr(rpy_index1 + 1, rpy_index2 - rpy_index1 - 1);
+
+          std::string::size_type s1;
+          std::string::size_type s2;
+          double rpy_x = std::stod(rpy, &s1);
+          double rpy_y = std::stod(rpy.substr(s1), &s2);
+          double rpy_z = std::stod((rpy.substr(s1)).substr(s2));
+
+          // Judge whether the origin is defined in the joint
+          if (is_joint == true) {
+            joint_vec_[joint_vec_.size() - 1]->rpy[0] = rpy_x;
+            joint_vec_[joint_vec_.size() - 1]->rpy[1] = rpy_y;
+            joint_vec_[joint_vec_.size() - 1]->rpy[2] = rpy_z;
+          }
+          // Judge whether the origin is defined in the link and in the visual
+          // part
+          else if (is_link == true && is_visual == true) {
+            link_vec_[link_vec_.size() - 1]->rpy[0] = rpy_x;
+            link_vec_[link_vec_.size() - 1]->rpy[1] = rpy_y;
+            link_vec_[link_vec_.size() - 1]->rpy[2] = rpy_z;
+          }
+
+      }
+
       // Parse the limit for joint
       index = line.find("<limit");
       if (index != -1 && is_joint == true) {
@@ -218,6 +248,7 @@ bool URDFParser::parse() {
     // Convert the coordinate from the parent link frame to the children link
     // frame
     children->joint_origin = children->origin;
+    children->joint_rpy = children->rpy;
     // children->joint_origin.x = children->origin.x;
     // children->joint_origin.y = children->origin.y;
     // children->joint_origin.z = children->origin.z;

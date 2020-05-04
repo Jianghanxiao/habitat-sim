@@ -25,10 +25,26 @@ class ArticulatedPartSceneNode : public SceneNode {
   };
   std::string getJointType() { return joint_type_; };
 
+  void setOrigin(vec3f origin) {
+    origin_ = origin;
+  };
+  vec3f getOrigin() { return origin_; };
+
+  void setRpy(vec3f rpy) {
+    rpy_ = rpy;
+  };
+  vec3f getRpy() { return rpy_; };
+
+
   void setJointOrigin(vec3f joint_origin) {
     joint_origin_ = joint_origin;
   };
   vec3f getJointOrigin() { return joint_origin_; };
+
+  void setJointRpy(vec3f joint_rpy) {
+    joint_rpy_ = joint_rpy;
+  };
+  vec3f getJointRpy() { return joint_rpy_; };
 
   void setJointLimit(vec2f joint_limit) {
     joint_limit_ = joint_limit;
@@ -50,7 +66,11 @@ class ArticulatedPartSceneNode : public SceneNode {
   std::string link_name_ = "";
   std::string joint_type_ = "fixed";
 
-  vec3f joint_origin_ = vec3f(0, 0, 0);  // Relative to the link itself
+  vec3f origin_ = vec3f(0, 0, 0);
+  vec3f rpy_ = vec3f(0, 0, 0);
+
+  vec3f joint_origin_ = vec3f(0, 0, 0); 
+  vec3f joint_rpy_ = vec3f(0, 0, 0);
   vec2f joint_limit_ = vec2f(-1, -1);
   vec3f joint_axis_ = vec3f(0, 0, 0);
 

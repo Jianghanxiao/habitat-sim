@@ -836,7 +836,10 @@ void ResourceManager::loadURDFMesh(
   scene::ArticulatedPartSceneNode* child = &parent->createArticulatedChild();
   child->setLinkName(node->link_name);
   child->setJointType(node->joint_type);
+  child->setOrigin(node->origin);
+  child->setRpy(node->rpy);
   child->setJointOrigin(node->joint_origin);
+  child->setJointRpy(node->joint_rpy);
   child->setJointLimit(node->joint_limit);
   child->setJointAxis(node->joint_axis);
 
