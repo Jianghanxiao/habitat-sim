@@ -843,113 +843,46 @@ void ResourceManager::loadURDFMesh(
   child->setJointLimit(node->joint_limit);
   child->setJointAxis(node->joint_axis);
 
+  // Deal with the joint origin and rpy for the node
+  auto& child_object = *child;
+  vec3f joint_rpy = node->joint_rpy, joint_origin = node->joint_origin;
+
+  // Deal with the rpy of the joint
+  child_object.rotateX(Magnum::Rad(joint_rpy[0]));
+  child_object.rotateY(Magnum::Rad(joint_rpy[1]));
+  child_object.rotateZ(Magnum::Rad(joint_rpy[2]));
+
+  // Deal with the origin of the joint
+  child_object.translateLocal(Magnum::Vector3(joint_origin[0], joint_origin[1], joint_origin[2]));
+
   if (file != "") {
     const assets::AssetInfo info = assets::AssetInfo::fromPath(file);
 
-    if (!loadURDFMeshData(info, child, drawables)) {
+    if (!loadGeneralMeshData(info, child, drawables)) {
       LOG(ERROR) << "cannot load " << file;
       std::exit(1);
     }
+
+    // Deal with the link origin and rpy for the mesh node
+    auto* mesh_node = child->children().first();
+    auto& object = *mesh_node;
+    vec3f rpy = node->rpy, origin = node->origin;
+    
+    // std::cout << object.translation()[0] << " " << object.translation()[1] << " " << object.translation()[2] << " !!!!\n ";
+    // std::cout << object.rotation().vector().x() << " " << object.rotation().vector().y() << " " << object.rotation().vector().z() << "\n";
+
+    // Deal with the rpy of the link
+    object.rotateX(Magnum::Rad(rpy[0]));
+    object.rotateY(Magnum::Rad(rpy[1]));
+    object.rotateZ(Magnum::Rad(rpy[2]));
+
+    // Deal with the origin of the link
+    object.translateLocal(Magnum::Vector3(origin[0], origin[1], origin[2]));
+
   }
 
   for (int i = 0; i <= int(node->child_link.size()) - 1; ++i) {
     loadURDFMesh(node->child_link[i], child, drawables);
-  }
-}
-
-bool ResourceManager::loadURDFMeshData(
-    const AssetInfo& info,
-    scene::ArticulatedPartSceneNode* child /* = nullptr */,
-    DrawableGroup* drawables /* = nullptr */) {
-  const std::string& filename = info.filepath;
-  const bool fileIsLoaded = resourceDict_.count(filename) > 0;
-  const bool drawData = child != nullptr && drawables != nullptr;
-
-  // Mesh & metaData container
-  MeshMetaData metaData;
-
-#ifndef MAGNUM_BUILD_STATIC
-  Magnum::PluginManager::Manager<Importer> manager;
-#else
-  // avoid using plugins that might depend on different library versions
-  Magnum::PluginManager::Manager<Importer> manager{"nonexistent"};
-#endif
-
-  std::unique_ptr<Importer> importer =
-      manager.loadAndInstantiate("AnySceneImporter");
-  manager.setPreferredPlugins("GltfImporter", {"TinyGltfImporter"});
-#ifdef ESP_BUILD_ASSIMP_SUPPORT
-  manager.setPreferredPlugins("ObjImporter", {"AssimpImporter"});
-#endif
-
-  // Optional File loading
-  if (!fileIsLoaded) {
-    if (!importer->openFile(filename)) {
-      LOG(ERROR) << "Cannot open file " << filename;
-      return false;
-    }
-    // if this is a new file, load it and add it to the dictionary
-    loadTextures(*importer, &metaData);
-    loadMaterials(*importer, &metaData);
-    loadMeshes(*importer, &metaData);
-    resourceDict_.emplace(filename, metaData);
-
-    // Register magnum mesh
-    if (importer->defaultScene() != -1) {
-      Corrade::Containers::Optional<Magnum::Trade::SceneData> sceneData =
-          importer->scene(importer->defaultScene());
-      if (!sceneData) {
-        LOG(ERROR) << "Cannot load scene, exiting";
-        return false;
-      }
-      for (unsigned int sceneDataID : sceneData->children3D()) {
-        loadMeshHierarchy(*importer, resourceDict_[filename].root, sceneDataID);
-      }
-    } else if (importer->mesh3DCount() && meshes_[metaData.meshIndex.first]) {
-      // no default scene --- standalone OBJ/PLY files, for example
-      // take a wild guess and load the first mesh with the first material
-      // addMeshToDrawables(metaData, *parent, drawables, ID_UNDEFINED, 0, 0);
-      loadMeshHierarchy(*importer, resourceDict_[filename].root, 0);
-    } else {
-      LOG(ERROR) << "No default scene available and no meshes found, exiting";
-      return false;
-    }
-
-    const quatf transform = info.frame.rotationFrameToWorld();
-    Magnum::Matrix4 R = Magnum::Matrix4::from(
-        Magnum::Quaternion(transform).toMatrix(), Magnum::Vector3());
-    resourceDict_[filename].root.transformFromLocalToParent =
-        R * resourceDict_[filename].root.transformFromLocalToParent;
-  } else {
-    metaData = resourceDict_[filename];
-  }
-
-  // Optional Instantiation
-  if (!drawData) {
-    //! Do not instantiate object
-    return true;
-  } else {
-    // intercept nullptr scene graph nodes (default) to add mesh to
-    // metadata list without adding it to scene graph
-    scene::SceneNode& newNode = *child;
-
-    //! Do instantiate object
-    MeshMetaData& metaData = resourceDict_[filename];
-    const bool forceReload = false;
-    // re-bind position, normals, uv, colors etc. to the corresponding buffers
-    // under *current* gl context
-    if (forceReload) {
-      int start = metaData.meshIndex.first;
-      int end = metaData.meshIndex.second;
-      if (0 <= start && start <= end) {
-        for (int iMesh = start; iMesh <= end; ++iMesh) {
-          meshes_[iMesh]->uploadBuffersToGPU(forceReload);
-        }
-      }
-    }  // forceReload
-
-    addComponent(metaData, newNode, drawables, metaData.root);
-    return true;
   }
 }
 

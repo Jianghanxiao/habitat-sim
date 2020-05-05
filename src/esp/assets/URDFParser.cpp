@@ -53,8 +53,8 @@ bool URDFParser::parse() {
       index = line.find("<link");
       if (index != -1) {
         is_link = true;
-        int name_index1 = line.find("\"");
-        int name_index2 = line.find("\"", name_index1 + 1);
+        int name_index1 = getQuoteIndex(line, index + 1); 
+        int name_index2 = getQuoteIndex(line, name_index1 + 1);
         link_vec_.push_back(std::make_unique<Link>());
         link_vec_[link_vec_.size() - 1]->link_name =
             line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
@@ -76,8 +76,8 @@ bool URDFParser::parse() {
       // Get the mesh filename
       index = line.find("<mesh");
       if (index != -1 && is_link == true && is_visual == true) {
-        int name_index1 = line.find("\"");
-        int name_index2 = line.find("\"", name_index1 + 1);
+        int name_index1 = getQuoteIndex(line, index + 1); 
+        int name_index2 = getQuoteIndex(line, name_index1 + 1); 
         link_vec_[link_vec_.size() - 1]->mesh_name = base_path + 
             line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
         // std::cout << name_link_map[link_vec_[link_vec_.size() -
@@ -100,29 +100,26 @@ bool URDFParser::parse() {
       // Get the joint type
       index = line.find("type");
       if (index != -1 && is_joint == true) {
-        // First two index for joint name
-        int name_index1 = line.find("\"");
-        int name_index2 = line.find("\"", name_index1 + 1);
-        // Index 3 and 4 for joint type
-        int name_index3 = line.find("\"", name_index2 + 1);
-        int name_index4 = line.find("\"", name_index3 + 1);
+        // Index 1 and 2 for joint type
+        int name_index1 = getQuoteIndex(line, index + 1); 
+        int name_index2 = getQuoteIndex(line, name_index1 + 1); 
         joint_vec_[joint_vec_.size() - 1]->joint_type =
-            line.substr(name_index3 + 1, name_index4 - name_index3 - 1);
+            line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
       }
 
       // Get the parent name
       index = line.find("<parent");
       if (index != -1 && is_joint == true) {
-        int name_index1 = line.find("\"");
-        int name_index2 = line.find("\"", name_index1 + 1);
+        int name_index1 = getQuoteIndex(line, index + 1); 
+        int name_index2 = getQuoteIndex(line, name_index1 + 1); 
         joint_vec_[joint_vec_.size() - 1]->parent_name =
             line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
       }
       // Get the child name
       index = line.find("<child");
       if (index != -1 && is_joint == true) {
-        int name_index1 = line.find("\"");
-        int name_index2 = line.find("\"", name_index1 + 1);
+        int name_index1 = getQuoteIndex(line, index + 1); 
+        int name_index2 = getQuoteIndex(line, name_index1 + 1); 
         joint_vec_[joint_vec_.size() - 1]->child_name =
             line.substr(name_index1 + 1, name_index2 - name_index1 - 1);
       }
@@ -135,8 +132,8 @@ bool URDFParser::parse() {
       // Parse the origin for link-visual and joint
       index = line.find("<origin");
       if (index != -1) {
-        int origin_index1 = line.find("\"");
-        int origin_index2 = line.find("\"", origin_index1 + 1);
+        int origin_index1 = getQuoteIndex(line, index + 1); 
+        int origin_index2 = getQuoteIndex(line, origin_index1 + 1); 
         std::string origin =
             line.substr(origin_index1 + 1, origin_index2 - origin_index1 - 1);
 
@@ -164,8 +161,8 @@ bool URDFParser::parse() {
       // Parse the rpy for link-visual and joint
       index = line.find("rpy");
       if(index != -1) {
-        int rpy_index1 = line.find("\"", index + 1);
-        int rpy_index2 = line.find("\"", rpy_index2 + 1);
+        int rpy_index1 = getQuoteIndex(line, index + 1); 
+        int rpy_index2 = getQuoteIndex(line, rpy_index1 + 1); 
         std::string rpy =
               line.substr(rpy_index1 + 1, rpy_index2 - rpy_index1 - 1);
 
@@ -196,14 +193,14 @@ bool URDFParser::parse() {
       if (index != -1 && is_joint == true) {
         int temp_index;
         temp_index = line.find("lower");
-        int lower_index1 = line.find("\"", temp_index + 1);
-        int lower_index2 = line.find("\"", lower_index1 + 1);
+        int lower_index1 = getQuoteIndex(line, temp_index + 1); 
+        int lower_index2 = getQuoteIndex(line, lower_index1 + 1); 
         std::string lower =
             line.substr(lower_index1 + 1, lower_index2 - lower_index1 - 1);
 
         temp_index = line.find("upper");
-        int upper_index1 = line.find("\"", temp_index);
-        int upper_index2 = line.find("\"", upper_index1 + 1);
+        int upper_index1 = getQuoteIndex(line, temp_index + 1);
+        int upper_index2 = getQuoteIndex(line, upper_index1 + 1); 
         std::string upper =
             line.substr(upper_index1 + 1, upper_index2 - upper_index1 - 1);
 
@@ -215,8 +212,8 @@ bool URDFParser::parse() {
       // Parse the axis for joint
       index = line.find("<axis");
       if (index != -1 && is_joint == true) {
-        int axis_index1 = line.find("\"");
-        int axis_index2 = line.find("\"", axis_index1 + 1);
+        int axis_index1 = getQuoteIndex(line, index);
+        int axis_index2 = getQuoteIndex(line, axis_index1 + 1); 
         std::string axis =
             line.substr(axis_index1 + 1, axis_index2 - axis_index1 - 1);
 
@@ -247,11 +244,8 @@ bool URDFParser::parse() {
     children->joint_axis = joint_vec_[i]->axis;
     // Convert the coordinate from the parent link frame to the children link
     // frame
-    children->joint_origin = children->origin;
-    children->joint_rpy = children->rpy;
-    // children->joint_origin.x = children->origin.x;
-    // children->joint_origin.y = children->origin.y;
-    // children->joint_origin.z = children->origin.z;
+    children->joint_origin = joint_vec_[i]->origin;
+    children->joint_rpy = joint_vec_[i]->rpy;
 
     // Update the hierarchy tree
     children->parent_link = parent;
@@ -275,6 +269,21 @@ bool URDFParser::parse() {
   }
 
   return true;
+}
+
+int URDFParser::getQuoteIndex(const std::string& line, int index) {
+  int index1 = line.find("\'", index);
+  int index2 = line.find("\"", index);
+
+  if(index1 == -1 && index2 == -1) {
+    LOG(ERROR) << "Some Error for " << line << ", index: " << index << "\n";
+    exit(0);
+  }
+
+  if(index1 == -1) return index2;
+  if(index2 == -1) return index1;
+  
+  return std::min(index1, index2);
 }
 
 }  // namespace assets

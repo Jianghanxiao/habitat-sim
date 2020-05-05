@@ -50,6 +50,7 @@ class URDFParser {
 
   void set(const std::string& filename);
   bool parse();
+  int getQuoteIndex(const std::string& line, int index = 0);
 
   const Link& getRoot() const { return *root_; }
 
