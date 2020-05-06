@@ -634,18 +634,16 @@ void Viewer::keyPressEvent(KeyEvent& event) {
           }
 
           if (current_value + moveUnit <= joint_limit[1] || limited == false) {
-            auto& object = *currentJoint;
-            object.translateLocal(
-                ((joint_axis[0] * object.transformation().right()) +
-                 (joint_axis[1] * object.transformation().up()) +
-                 (joint_axis[2] * object.transformation().backward())) *
-                moveUnit);
+            // Update the states in the mesh node
+            auto* articulation_node = currentJoint->children().first();
+            auto& object = *articulation_node;
+            // Joint axis should be in the joint frame
+            object.translateLocal(moveUnit * Magnum::Vector3(joint_axis[0], joint_axis[1], joint_axis[2]));
             currentJoint->setCurrentValue(current_value + moveUnit);
           } else {
             LOG(WARNING) << "Has reached max range";
           }
         } else if (currentJoint->getJointType() == "revolute") {
-          vec3f joint_origin = currentJoint->getJointOrigin();
           vec3f joint_axis = currentJoint->getJointAxis();
           vec2f joint_limit = currentJoint->getJointLimit();
           double current_value = currentJoint->getCurrentValue();
@@ -662,22 +660,13 @@ void Viewer::keyPressEvent(KeyEvent& event) {
 
           if (current_value + rotateUnit <= joint_limit[1] ||
               limited == false) {
-            auto& object = *currentJoint;
-            object.translateLocal(
-                (-joint_origin[0] * object.transformation().right()) +
-                (-joint_origin[1] * object.transformation().up()) +
-                (-joint_origin[2] * object.transformation().backward()));
+            // Update the states in the mesh node
+            auto* articulation_node = currentJoint->children().first();
+            auto& object = *articulation_node;
 
             object.rotate(
                 Magnum::Rad(rotateUnit),
                 Magnum::Vector3(joint_axis[0], joint_axis[1], joint_axis[2]));
-            // LOG(INFO) << joint_origin.x << " " << joint_origin.y << " " <<
-            // joint_origin.z;
-
-            object.translateLocal(
-                (joint_origin[0] * object.transformation().right()) +
-                (joint_origin[1] * object.transformation().up()) +
-                (joint_origin[2] * object.transformation().backward()));
             currentJoint->setCurrentValue(current_value + rotateUnit);
           } else {
             LOG(WARNING) << "Has reached max range";
@@ -705,18 +694,16 @@ void Viewer::keyPressEvent(KeyEvent& event) {
           }
 
           if (current_value - moveUnit >= joint_limit[0] || limited == false) {
-            auto& object = *currentJoint;
-            object.translateLocal(
-                ((joint_axis[0] * object.transformation().right()) +
-                 (joint_axis[1] * object.transformation().up()) +
-                 (joint_axis[2] * object.transformation().backward())) *
-                (-moveUnit));
+            // Update the states in the mesh node
+            auto* articulation_node = currentJoint->children().first();
+            auto& object = *articulation_node;
+            // Joint axis should be in the joint frame
+            object.translateLocal(-moveUnit * Magnum::Vector3(joint_axis[0], joint_axis[1], joint_axis[2]));
             currentJoint->setCurrentValue(current_value - moveUnit);
           } else {
             LOG(WARNING) << "Has reached min range";
           }
         } else if (currentJoint->getJointType() == "revolute") {
-          vec3f joint_origin = currentJoint->getJointOrigin();
           vec3f joint_axis = currentJoint->getJointAxis();
           vec2f joint_limit = currentJoint->getJointLimit();
           double current_value = currentJoint->getCurrentValue();
@@ -733,20 +720,13 @@ void Viewer::keyPressEvent(KeyEvent& event) {
 
           if (current_value - rotateUnit >= joint_limit[0] ||
               limited == false) {
-            auto& object = *currentJoint;
-            object.translateLocal(
-                (-joint_origin[0] * object.transformation().right()) +
-                (-joint_origin[1] * object.transformation().up()) +
-                (-joint_origin[2] * object.transformation().backward()));
+            // Update the states in the mesh node
+            auto* articulation_node = currentJoint->children().first();
+            auto& object = *articulation_node;
 
-            object.rotateLocal(
+            object.rotate(
                 Magnum::Rad(-rotateUnit),
                 Magnum::Vector3(joint_axis[0], joint_axis[1], joint_axis[2]));
-
-            object.translateLocal(
-                (joint_origin[0] * object.transformation().right()) +
-                (joint_origin[1] * object.transformation().up()) +
-                (joint_origin[2] * object.transformation().backward()));
             currentJoint->setCurrentValue(current_value - rotateUnit);
           } else {
             LOG(WARNING) << "Has reached min range";

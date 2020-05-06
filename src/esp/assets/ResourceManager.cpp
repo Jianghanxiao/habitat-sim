@@ -854,17 +854,19 @@ void ResourceManager::loadURDFMesh(
 
   // Deal with the origin of the joint
   child_object.translateLocal(Magnum::Vector3(joint_origin[0], joint_origin[1], joint_origin[2]));
+  
+  scene::ArticulatedPartSceneNode* articulationNode = &child->createArticulatedChild();
 
   if (file != "") {
     const assets::AssetInfo info = assets::AssetInfo::fromPath(file);
 
-    if (!loadGeneralMeshData(info, child, drawables)) {
+    if (!loadGeneralMeshData(info, articulationNode, drawables)) {
       LOG(ERROR) << "cannot load " << file;
       std::exit(1);
     }
 
     // Deal with the link origin and rpy for the mesh node
-    auto* mesh_node = child->children().first();
+    auto* mesh_node = articulationNode->children().first();
     auto& object = *mesh_node;
     vec3f rpy = node->rpy, origin = node->origin;
     
@@ -882,7 +884,7 @@ void ResourceManager::loadURDFMesh(
   }
 
   for (int i = 0; i <= int(node->child_link.size()) - 1; ++i) {
-    loadURDFMesh(node->child_link[i], child, drawables);
+    loadURDFMesh(node->child_link[i], articulationNode, drawables);
   }
 }
 

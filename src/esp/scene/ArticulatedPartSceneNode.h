@@ -13,6 +13,7 @@ class ArticulatedPartSceneNode : public SceneNode {
  public:
   ArticulatedPartSceneNode() = delete;
   ArticulatedPartSceneNode(SceneNode& parent) : SceneNode(parent) {}
+  ArticulatedPartSceneNode(ArticulatedPartSceneNode& parent) : SceneNode(parent) {}
 
   ArticulatedPartSceneNode& createArticulatedChild();
 
